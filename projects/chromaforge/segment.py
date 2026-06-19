@@ -1,23 +1,34 @@
 import cv2
 import numpy as np
 
-#Given an image, blur it and make it colour blocky
-img = cv2.imread('./projects/chromaforge/strawberry.jpg')
 
-bBlurred = cv2.bilateralFilter(src=img, ksize=(11,11), sigmaX=5)
-threshold1 = 50
-threshold2 = 150
-greyed = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-edges = cv2.Canny(greyed, threshold1, threshold2, 3)
+# Splits the picture into k different segments and colours each segment its most occuring colour
+def colourSegment(img: Matlike, k: int) -> Matlike:
+    # Use a bilateral blur to slightly blur while preserving edges
+    bilateral_blur = cv2.bilateralFilter(src=img, d=9, sigmaColor=20, sigmaSpace=150)
 
-cv2.imshow('test', greyed)
-cv2.imshow('test2', edges)
+    # Convert to LAB to match human perception
+    img_LAB = cv2.cvtColor(bilateral_blur, cv2.COLOR_BGR2LAB)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # Use K-means to split the image into K different colours
+    k_means_img = (img_LAB.astype(np.float32)).reshape((-1, 3))
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    compactness, labels, centers = cv2.kmeans(
+        data=k_means_img,
+        K=k,
+        bestLabels=None,
+        criteria=criteria,
+        attempts=10,
+        flags=cv2.KMEANS_PP_CENTERS,
+    )
 
+    # Convert centers back to 8-bit colors
+    centers = np.uint8(centers)
 
-# Bilateral filter (blur that preserves edges — critical, not Gaussian)
-# K-means in LAB color space (not RGB — LAB matches human color perception much better)
-# Morphological cleanup (remove small islands, smooth jagged borders)
-# Optionally: edge-aware smoothing to clean up the region boundaries
+    # Map the labels to the center colors to reconstruct the flattened image
+    quantized_flattened = centers[labels.flatten()]
+
+    # Reshape back into the original 3D image dimensions
+    reshaped_img = quantized_flattened.reshape(img.shape)
+    final_img = cv2.cvtColor(reshaped_img, cv2.COLOR_LAB2BGR)
+    return final_img
