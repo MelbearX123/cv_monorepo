@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 # cv2.imread(), cv2.imshow(), cv2.waitKey() — load and display an image.
-img = cv2.imread('./cv_learning/strawberry.jpg')
+img = cv2.imread("./cv_learning/strawberry.jpg")
 
 # cv2.imshow('Strawberry!', img)
 # cv2.waitKey(0)
@@ -37,16 +37,16 @@ merged = cv2.merge([b, g, r])
 # cv2.destroyAllWindows()
 
 # cv2.calcHist() and matplotlib to visualise histograms per channel.
-bhist = cv2.calcHist([img], [0], None, [256], [0,256])
-plt.plot(bhist, color='b')
+bhist = cv2.calcHist([img], [0], None, [256], [0, 256])
+plt.plot(bhist, color="b")
 
-ghist = cv2.calcHist([img], [1], None, [256], [0,256])
-plt.plot(ghist, color='g')
+ghist = cv2.calcHist([img], [1], None, [256], [0, 256])
+plt.plot(ghist, color="g")
 
-rhist = cv2.calcHist([img], [2], None, [256], [0,256])
-plt.plot(rhist, color='r')
-plt.title('Colour channel histogram')
+rhist = cv2.calcHist([img], [2], None, [256], [0, 256])
+plt.plot(rhist, color="r")
+plt.title("Colour channel histogram")
 plt.show()
 
 # cv2.imwrite() — save your processed images.
-cv2.imwrite('output.jpg', g) #Dont want clutter, image deleted
+cv2.imwrite("output.jpg", g)  # Dont want clutter, image deleted
