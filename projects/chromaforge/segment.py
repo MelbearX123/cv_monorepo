@@ -1,9 +1,10 @@
 import cv2
+from cv2.typing import MatLike
 import numpy as np
 
 
 # Splits the picture into k different segments and colours each segment its most occuring colour
-def colourSegment(img: Matlike, k: int) -> Matlike:
+def colourSegment(img: MatLike, k: int) -> MatLike:
     # Use a bilateral blur to slightly blur while preserving edges
     bilateral_blur = cv2.bilateralFilter(src=img, d=9, sigmaColor=20, sigmaSpace=150)
 
