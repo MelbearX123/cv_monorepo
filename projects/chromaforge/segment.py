@@ -37,23 +37,3 @@ def colourSegment(img: MatLike, sp: int, sr: int, k: int) -> tuple[MatLike, MatL
 
     reshaped_labels = labels.reshape(img.shape[:2])
     return final_img, reshaped_labels
-
-tree = cv2.imread('./projects/chromaforge/tree.png')
-mountain = cv2.imread('./projects/chromaforge/mountain.png')
-iceberg = cv2.imread('./projects/chromaforge/iceberg.png')
-
-test1, _ = colourSegment(tree, sp=20, sr=45, k=8)
-test2, _ = colourSegment(mountain, sp=5, sr=5, k=5)
-test3, _ = colourSegment(iceberg, sp=5, sr=5, k=3)
-
-result1 = np.hstack([tree, test1])
-
-
-# cv2.imshow('test1', result1)
-cv2.imshow('test2', test2)
-cv2.imshow('mountain', mountain)
-cv2.imshow('test3', test3)
-cv2.imshow('iceberg', iceberg)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
