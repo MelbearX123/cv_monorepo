@@ -3,15 +3,11 @@ from cv2.typing import MatLike
 import numpy as np
 
 
-# Mean-shift filtering merges pixels that are close in both position and
-# colour into spatially-coherent blobs. K-means then caps the result to k
-# colours, merging similar blobs together. Because k-means runs on every
-# pixel (not just the unique colours), frequently-occurring colours pull
-# the cluster centres toward them automatically - frequency weighting
-# falls out for free, no need to weight anything by hand.
 def colourSegment(img: MatLike, sp: int, sr: int, k: int) -> tuple[MatLike, MatLike]:
     # sp = spatial window radius, sr = colour window radius
-    bilateral_blurred = cv2.bilateralFilter(src=img, d=9, sigmaColor=150, sigmaSpace=150)
+    bilateral_blurred = cv2.bilateralFilter(
+        src=img, d=9, sigmaColor=150, sigmaSpace=150
+    )
     mean_shifted = cv2.pyrMeanShiftFiltering(bilateral_blurred, sp, sr)
 
     # Convert to LAB to match human perception
