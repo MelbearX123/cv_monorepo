@@ -1,0 +1,7 @@
+# cv_learning — CV practice (Week0/Week1)
+# opencv-contrib-python is the monorepo-wide OpenCV choice (superset of opencv-python;
+# mediapipe in interactive_lamp pulls it in, so all projects share one cv2).
+numpy==2.4.6
+opencv-contrib-python==5.0.0.93
+matplotlib==3.11.0
+torch==2.12.0+cu126
