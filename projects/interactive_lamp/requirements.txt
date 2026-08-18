@@ -1,0 +1,14 @@
+# interactive_lamp — Human Computer Lab live character robot challenge
+# Pins added once installs are confirmed working. Unpinned for now.
+
+# --- Confirmed / core ---
+mediapipe          # face landmarks + head pose (engagement detection)
+mujoco             # load URDF, render lamp + controllable light, drive joints
+# opencv-python and numpy already provided by the shared monorepo .venv
+
+# --- Very likely (uncomment as each subsystem is built) ---
+# sounddevice      # mic capture + speaker playback (raw audio I/O)
+# pygame           # sound effects + music playback as gesture renderers
+
+# --- Decision still open (pick provider, then uncomment) ---
+# openai           # realtime speech-to-speech + VLM for scene memory
