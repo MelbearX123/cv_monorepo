@@ -1,4 +1,40 @@
+# Global
 /.venv
+__pycache__/
+.DS_Store
+Thumbs.db
+
+# chromaforge
 /projects/chromaforge/.claude
 /projects/chromaforge/test_imgs
-/projects/chromaforge/__pycache__
+
+# interactive_lamp
+/projects/interactive_lamp/**/*.py[cod]
+/projects/interactive_lamp/**/*.egg-info/
+/projects/interactive_lamp/**/.pytest_cache/
+/projects/interactive_lamp/**/.env
+/projects/interactive_lamp/**/.env.*
+/projects/interactive_lamp/**/*.key
+/projects/interactive_lamp/**/secrets.*
+/projects/interactive_lamp/**/*.mp4
+/projects/interactive_lamp/**/*.mov
+/projects/interactive_lamp/**/*.avi
+/projects/interactive_lamp/**/*.wav
+/projects/interactive_lamp/**/*.mp3
+/projects/interactive_lamp/**/*.gif
+/projects/interactive_lamp/**/renders/
+/projects/interactive_lamp/**/recordings/
+/projects/interactive_lamp/**/captures/
+/projects/interactive_lamp/**/thumbnails/
+/projects/interactive_lamp/**/frames/
+/projects/interactive_lamp/**/out/
+/projects/interactive_lamp/**/*.task
+/projects/interactive_lamp/**/*.tflite
+/projects/interactive_lamp/**/*.onnx
+/projects/interactive_lamp/**/*.pt
+/projects/interactive_lamp/**/*.pth
+/projects/interactive_lamp/**/models/
+/projects/interactive_lamp/**/.cache/
+/projects/interactive_lamp/**/*.log
+/projects/interactive_lamp/**/logs/
+/projects/interactive_lamp/**/.ipynb_checkpoints/
