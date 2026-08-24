@@ -47,9 +47,11 @@ Deployment 15% · Physical reasoning 10% · Evidence/communication 10%.
 
 **0. Foundations** ✅ deps installed (mediapipe, mujoco), URDF confirmed rendering in MuJoCo.
 
-**1. Body layer** — Wrap the URDF in MJCF adding a `<light>` + `<camera>` on the head frame.
-Build a thin `LampBody` adapter: `set_joints()`, `set_light(color/intensity)`, `get_camera_frame()`.
-This is the single boundary between "character brain" and "robot body."
+**1. Body layer** ✅ — URDF converted to MJCF (`src/lamp.xml`), `<light>` on the head frame.
+`LampBody` adapter done: `set_joints()`, `set_light()`, `model`/`data` accessors; `render.py`
+drives the lamp through it. This is the single boundary between "character brain" and "robot body".
+DECISION: sim head-camera cut — perception uses the laptop webcam (the character's eyes), so the
+simulated POV camera feeds nothing required. Removed `get_camera_frame` and its `height`/`width`.
 
 **2. Character state + renderers** — Define the state object. Write a small gesture library
 (perk-up, look-away, nod, idle-breathing) with easing curves that blend **motion + light + sound
