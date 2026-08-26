@@ -9,7 +9,7 @@ def ease_in_out(t: float) -> float:
 def ease_in_out_back(t: float) -> float:
     """Overshoots at both ends. Springy / happy.
     Returns values slightly below 0 near the start and above 1 near the end."""
-    c1 = 1.70158  # larger = bouncier
+    c1 = 0.9  # larger = bouncier
     c2 = c1 * 1.525
     if t < 0.5:
         return (pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
@@ -25,5 +25,5 @@ EASING = {
 DURATION_SCALE = {
     Mood.NEUTRAL: 1.0,
     Mood.SAD: 1.6,
-    Mood.HAPPY: 0.6,
+    Mood.HAPPY: 0.8,
 }
