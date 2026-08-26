@@ -20,7 +20,11 @@ class LampBody:
 
     def set_joints(self, targets: dict[str, float]) -> None:
         for name, angle in targets.items():
-            self._data.qpos[self._model.joint(name).qposadr[0]] = angle
+            joint = self._model.joint(name)
+            low, high = joint.range
+            if low < high:  # clamp to the joint's limits when it has them
+                angle = min(max(angle, low), high)
+            self._data.qpos[joint.qposadr[0]] = angle
         mujoco.mj_forward(m=self._model, d=self._data)
 
     def get_joints(self, names: Iterable[str]) -> dict[str, float]:
