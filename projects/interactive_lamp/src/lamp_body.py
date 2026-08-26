@@ -1,5 +1,6 @@
 import mujoco
 import numpy as np
+from collections.abc import Iterable
 from pathlib import Path
 
 
@@ -19,8 +20,18 @@ class LampBody:
 
     def set_joints(self, targets: dict[str, float]) -> None:
         for name, angle in targets.items():
-            self._data.qpos[self._model.joint(name).qposadr[0]] = angle
+            joint = self._model.joint(name)
+            low, high = joint.range
+            if low < high:  # clamp to the joint's limits when it has them
+                angle = min(max(angle, low), high)
+            self._data.qpos[joint.qposadr[0]] = angle
         mujoco.mj_forward(m=self._model, d=self._data)
+
+    def get_joints(self, names: Iterable[str]) -> dict[str, float]:
+        return {
+            name: float(self._data.qpos[self._model.joint(name).qposadr[0]])
+            for name in names
+        }
 
     def set_light(self, rgb_values: list[float]) -> None:
         light_id = mujoco.mj_name2id(
@@ -28,3 +39,9 @@ class LampBody:
         )
         R, G, B = np.clip(a=rgb_values, a_min=0, a_max=1.0)
         self._model.light_diffuse[light_id] = [R, G, B]
+
+    def get_light(self) -> list[float]:
+        light_id = mujoco.mj_name2id(
+            self._model, mujoco.mjtObj.mjOBJ_LIGHT, "lamp_light"
+        )
+        return [float(c) for c in self._model.light_diffuse[light_id]]
