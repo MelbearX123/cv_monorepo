@@ -1,11 +1,16 @@
 import cv2
 
+from config import CAMERA_INDEX, CAMERA_WIDTH, CAMERA_HEIGHT
+
 
 class Camera:
     """Owns the webcam. The single source of frames for face detection and the VLM."""
 
     def __init__(
-        self, device_index: int = 0, width: int = 640, height: int = 480
+        self,
+        device_index: int = CAMERA_INDEX,
+        width: int = CAMERA_WIDTH,
+        height: int = CAMERA_HEIGHT,
     ) -> None:
         self._capture = cv2.VideoCapture(device_index)
         self._capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
