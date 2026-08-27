@@ -4,11 +4,14 @@ import cv2
 class Camera:
     """Owns the webcam. The single source of frames for face detection and the VLM."""
 
-    def __init__(self, device_index: int = 0, width: int = 640, height: int = 480) -> None:
+    def __init__(
+        self, device_index: int = 0, width: int = 640, height: int = 480
+    ) -> None:
         self._capture = cv2.VideoCapture(device_index)
         self._capture.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self._capture.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-        if not self._capture.isOpened(): raise RuntimeError("Camera not available")
+        if not self._capture.isOpened():
+            raise RuntimeError("Camera not available")
 
     def get_frame(self):
         """Return the most recent frame as an RGB image, or None if the read failed."""
