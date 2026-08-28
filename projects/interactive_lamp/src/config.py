@@ -6,7 +6,7 @@ CAMERA_WIDTH = 640
 CAMERA_HEIGHT = 480
 
 # --- Lamp ---
-LIGHT_NAME = "lamp_light"  # name of the controllable light in lamp.xml
+LIGHT_NAME = "lamp_light"
 LAMP_MODEL_PATH = Path(__file__).resolve().parent / "lamp.xml"
 RENDER_WIDTH = 640
 RENDER_HEIGHT = 480
@@ -32,3 +32,22 @@ DISENGAGE_DWELL = 1.0
 # --- Face reader: emotion (blendshape score, 0..1) ---
 SMILE_THRESHOLD = 0.4
 SAD_THRESHOLD = 0.5
+
+# --- Speech: audio I/O (Hz / channels) ---
+STT_SAMPLE_RATE = 16000
+TTS_SAMPLE_RATE = 24000
+AUDIO_CHANNELS = 1
+VAD_FRAME = 512
+
+# --- Speech: models ---
+WHISPER_MODEL = "base"
+WHISPER_COMPUTE = "int8"
+WHISPER_DEVICE = "cpu"
+KOKORO_LANG = "a"  # 'a' = American English
+KOKORO_VOICE = "af_heart"
+
+# --- Speech: turn-taking / VAD (probability + seconds) ---
+VAD_THRESHOLD = 0.5
+VAD_MIN_SILENCE = 0.7
+VAD_SPEECH_PAD = 0.2
+MAX_RECORD_SECONDS = 10.0
