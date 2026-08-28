@@ -15,13 +15,20 @@ class Mood(StrEnum):
     SAD = "sad"
 
 
+class Gesture(StrEnum):
+    ENGAGE = "engage"
+    DISENGAGE = "disengage"
+    NOD = "nod"
+    SHAKE = "shake"
+
+
 poses = {
     "engage": {
         "joints": {
             Joints.BASE_YAW: 0,
             Joints.SHOULDER_PITCH: 0.2,
             Joints.ELBOW_PITCH: -0.9,
-            Joints.NECK_YAW: 0,
+            Joints.NECK_YAW: 0.35,
             Joints.HEAD_PITCH: -0.3,
         },
         "light": [1.0, 1.0, 1.0],  # bright white
@@ -41,7 +48,7 @@ poses = {
             Joints.BASE_YAW: 0,
             Joints.SHOULDER_PITCH: 0.2,
             Joints.ELBOW_PITCH: -0.9,
-            Joints.NECK_YAW: 0,
+            Joints.NECK_YAW: 0.35,
             Joints.HEAD_PITCH: -0.6,
         },
         "light": [0.0, 1.0, 0.0],  # green
@@ -51,7 +58,7 @@ poses = {
             Joints.BASE_YAW: 0,
             Joints.SHOULDER_PITCH: 0.2,
             Joints.ELBOW_PITCH: -0.9,
-            Joints.NECK_YAW: 0,
+            Joints.NECK_YAW: 0.35,
             Joints.HEAD_PITCH: 0,
         },
         "light": [0.0, 1.0, 0.0],  # green
@@ -79,8 +86,8 @@ poses = {
 }
 
 gestures = {
-    "engage": ["engage"],
-    "disengage": ["disengage"],
-    "nod": ["nod_down", "nod_up", "nod_down"],
-    "shake": ["shake_left", "shake_right", "shake_left"],
+    Gesture.ENGAGE: ["engage"],
+    Gesture.DISENGAGE: ["disengage"],
+    Gesture.NOD: ["nod_down", "nod_up", "nod_down"],
+    Gesture.SHAKE: ["shake_left", "shake_right", "shake_left"],
 }

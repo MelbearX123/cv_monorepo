@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from poses import poses, gestures
+from poses import poses, gestures, Gesture
 from easing import EASING, DURATION_SCALE, ease_in_out
 
 
@@ -25,7 +25,7 @@ class LampGesture:
         """True while a gesture is still playing."""
         return self._active
 
-    def play(self, gesture_name: str, duration: float = 1.0) -> None:
+    def play(self, gesture_name: Gesture, duration: float = 1.0) -> None:
         """Begin a gesture from the lamp's current state. Mood scales the duration."""
         self._sequence = [poses[name] for name in gestures[gesture_name]]
         self._seg_index = 0
