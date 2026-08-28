@@ -28,7 +28,7 @@ poses = {
             Joints.BASE_YAW: 0,
             Joints.SHOULDER_PITCH: 0.2,
             Joints.ELBOW_PITCH: -0.9,
-            Joints.NECK_YAW: 0,
+            Joints.NECK_YAW: 0.35,
             Joints.HEAD_PITCH: -0.3,
         },
         "light": [1.0, 1.0, 1.0],  # bright white
@@ -48,7 +48,7 @@ poses = {
             Joints.BASE_YAW: 0,
             Joints.SHOULDER_PITCH: 0.2,
             Joints.ELBOW_PITCH: -0.9,
-            Joints.NECK_YAW: 0,
+            Joints.NECK_YAW: 0.35,
             Joints.HEAD_PITCH: -0.6,
         },
         "light": [0.0, 1.0, 0.0],  # green
@@ -58,7 +58,7 @@ poses = {
             Joints.BASE_YAW: 0,
             Joints.SHOULDER_PITCH: 0.2,
             Joints.ELBOW_PITCH: -0.9,
-            Joints.NECK_YAW: 0,
+            Joints.NECK_YAW: 0.35,
             Joints.HEAD_PITCH: 0,
         },
         "light": [0.0, 1.0, 0.0],  # green
