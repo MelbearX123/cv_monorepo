@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from poses import Mood
 from enum import StrEnum
 
@@ -11,6 +11,6 @@ class Activity(StrEnum):
 class CharacterState:
     user_emotion: str | None = None
     mood: Mood = Mood.NEUTRAL
-    memory: list = []
+    memory: list = field(default_factory=list)
     is_engaged: bool = False
     activity: Activity = Activity.IDLE
