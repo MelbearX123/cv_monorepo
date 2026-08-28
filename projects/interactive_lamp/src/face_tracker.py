@@ -21,6 +21,7 @@ from config import (
     MIN_TRACKING_CONFIDENCE,
 )
 
+
 class FaceTracker:
     def __init__(self) -> None:
         self._base_options = python.BaseOptions(model_asset_path=str(MODEL_PATH))
@@ -30,8 +31,8 @@ class FaceTracker:
             num_faces=MAX_NUM_FACES,
             min_face_detection_confidence=MIN_FACE_DETECTION_CONFIDENCE,
             min_tracking_confidence=MIN_TRACKING_CONFIDENCE,
-            output_face_blendshapes=True,                 # -> emotion signal
-            output_facial_transformation_matrixes=True,   # -> head pose (looking at me?)
+            output_face_blendshapes=True,  # -> emotion signal
+            output_facial_transformation_matrixes=True,  # -> head pose (looking at me?)
         )
         self._detector = vision.FaceLandmarker.create_from_options(self._options)
         self._last_timestamp_ms = -1
@@ -39,7 +40,9 @@ class FaceTracker:
     def process(self, rgb_frame: MatLike) -> FaceLandmarkerResult | None:
         """Run detection on an RGB frame. Return the result, or None if no face."""
         mp_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
-        timestamp_ms = max(self._last_timestamp_ms + 1, time.monotonic_ns() // 1_000_000)
+        timestamp_ms = max(
+            self._last_timestamp_ms + 1, time.monotonic_ns() // 1_000_000
+        )
         self._last_timestamp_ms = timestamp_ms
         result = self._detector.detect_for_video(mp_frame, timestamp_ms)
         if not result.face_landmarks:

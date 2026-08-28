@@ -28,9 +28,17 @@ def main() -> None:
                 matrix = result.facial_transformation_matrixes[0]
                 yaw = math.atan2(matrix[0][2], matrix[2][2])
                 scores = {c.category_name: c.score for c in result.face_blendshapes[0]}
-                smile = max(scores.get("mouthSmileLeft", 0.0), scores.get("mouthSmileRight", 0.0))
-                frown = max(scores.get("mouthFrownLeft", 0.0), scores.get("mouthFrownRight", 0.0))
-                brow = scores.get("browInnerUp", 0.0)   # inner-brow raise = reliable "sad" signal
+                smile = max(
+                    scores.get("mouthSmileLeft", 0.0),
+                    scores.get("mouthSmileRight", 0.0),
+                )
+                frown = max(
+                    scores.get("mouthFrownLeft", 0.0),
+                    scores.get("mouthFrownRight", 0.0),
+                )
+                brow = scores.get(
+                    "browInnerUp", 0.0
+                )  # inner-brow raise = reliable "sad" signal
                 lines = [
                     f"yaw:   {yaw:+.2f}   (turn head L/R -> should swing)",
                     f"smile: {smile:.2f}",
@@ -38,10 +46,17 @@ def main() -> None:
                     f"brow:  {brow:.2f}   (make a sad/worried face)",
                 ]
 
-            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)   # back to BGR for imshow
+            bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)  # back to BGR for imshow
             for i, text in enumerate(lines):
-                cv2.putText(bgr, text, (16, 36 + i * 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+                cv2.putText(
+                    bgr,
+                    text,
+                    (16, 36 + i * 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.8,
+                    (0, 255, 0),
+                    2,
+                )
             cv2.imshow("face test (q to quit)", bgr)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break

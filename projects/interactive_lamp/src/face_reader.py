@@ -11,6 +11,7 @@ from config import (
     SAD_THRESHOLD,
 )
 
+
 class FaceReader:
     def __init__(
         self,
@@ -25,8 +26,8 @@ class FaceReader:
         self._disengage_dwell = disengage_dwell
 
         self._is_engaged = False
-        self._looking_time = 0.0  
-        self._away_time = 0.0      
+        self._looking_time = 0.0
+        self._away_time = 0.0
 
     def read(self, result: FaceLandmarkerResult | None, dt: float) -> tuple[bool, Mood]:
         """Update engagement + emotion from one frame. Returns (is_engaged, mood)."""
@@ -46,10 +47,11 @@ class FaceReader:
 
     def _update_engagement(self, looking: bool, dt: float) -> bool:
         """Dwell timing (temporal hysteresis) so engagement can't flicker frame-to-frame."""
-        if looking: 
-            self._looking_time += dt; self._away_time = 0.0
-        else:       
-            self._away_time += dt;     
+        if looking:
+            self._looking_time += dt
+            self._away_time = 0.0
+        else:
+            self._away_time += dt
             self._looking_time = 0.0
         if not self._is_engaged and self._looking_time >= self._engage_dwell:
             self._is_engaged = True
@@ -62,8 +64,10 @@ class FaceReader:
         if result is None or not result.face_blendshapes:
             return Mood.NEUTRAL
         scores = {c.category_name: c.score for c in result.face_blendshapes[0]}
-        smile = max(scores.get("mouthSmileLeft", 0.0), scores.get("mouthSmileRight", 0.0))
-        sad = scores.get("browInnerUp", 0.0)   # brow raise is the reliable sad signal
+        smile = max(
+            scores.get("mouthSmileLeft", 0.0), scores.get("mouthSmileRight", 0.0)
+        )
+        sad = scores.get("browInnerUp", 0.0)  # brow raise is the reliable sad signal
         if smile > SMILE_THRESHOLD:
             return Mood.HAPPY
         if sad > SAD_THRESHOLD:

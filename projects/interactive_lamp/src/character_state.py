@@ -2,10 +2,12 @@ from dataclasses import dataclass, field
 from poses import Mood
 from enum import StrEnum
 
+
 class Activity(StrEnum):
     IDLE = "idle"
     SPEAKING = "speaking"
     GESTURING = "gesturing"
+
 
 @dataclass
 class CharacterState:

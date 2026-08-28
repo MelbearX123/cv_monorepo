@@ -36,14 +36,10 @@ class LampBody:
         }
 
     def set_light(self, rgb_values: list[float]) -> None:
-        light_id = mujoco.mj_name2id(
-            self._model, mujoco.mjtObj.mjOBJ_LIGHT, LIGHT_NAME
-        )
+        light_id = mujoco.mj_name2id(self._model, mujoco.mjtObj.mjOBJ_LIGHT, LIGHT_NAME)
         R, G, B = np.clip(a=rgb_values, a_min=0, a_max=1.0)
         self._model.light_diffuse[light_id] = [R, G, B]
 
     def get_light(self) -> list[float]:
-        light_id = mujoco.mj_name2id(
-            self._model, mujoco.mjtObj.mjOBJ_LIGHT, LIGHT_NAME
-        )
+        light_id = mujoco.mj_name2id(self._model, mujoco.mjtObj.mjOBJ_LIGHT, LIGHT_NAME)
         return [float(c) for c in self._model.light_diffuse[light_id]]
