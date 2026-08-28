@@ -7,6 +7,9 @@ CAMERA_HEIGHT = 480
 
 # --- Lamp ---
 LIGHT_NAME = "lamp_light"  # name of the controllable light in lamp.xml
+LAMP_MODEL_PATH = Path(__file__).resolve().parent / "lamp.xml"
+RENDER_WIDTH = 640
+RENDER_HEIGHT = 480
 
 # --- MediaPipe Face Landmarker ---
 MODEL_PATH = Path(__file__).resolve().parent / "models" / "face_landmarker.task"

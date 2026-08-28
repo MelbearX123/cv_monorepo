@@ -15,6 +15,13 @@ class Mood(StrEnum):
     SAD = "sad"
 
 
+class Gesture(StrEnum):
+    ENGAGE = "engage"
+    DISENGAGE = "disengage"
+    NOD = "nod"
+    SHAKE = "shake"
+
+
 poses = {
     "engage": {
         "joints": {
@@ -79,8 +86,8 @@ poses = {
 }
 
 gestures = {
-    "engage": ["engage"],
-    "disengage": ["disengage"],
-    "nod": ["nod_down", "nod_up", "nod_down"],
-    "shake": ["shake_left", "shake_right", "shake_left"],
+    Gesture.ENGAGE: ["engage"],
+    Gesture.DISENGAGE: ["disengage"],
+    Gesture.NOD: ["nod_down", "nod_up", "nod_down"],
+    Gesture.SHAKE: ["shake_left", "shake_right", "shake_left"],
 }
