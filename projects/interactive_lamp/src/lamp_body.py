@@ -3,6 +3,8 @@ import numpy as np
 from collections.abc import Iterable
 from pathlib import Path
 
+from config import LIGHT_NAME
+
 
 class LampBody:
     def __init__(self, model_path: Path) -> None:
@@ -35,13 +37,13 @@ class LampBody:
 
     def set_light(self, rgb_values: list[float]) -> None:
         light_id = mujoco.mj_name2id(
-            self._model, mujoco.mjtObj.mjOBJ_LIGHT, "lamp_light"
+            self._model, mujoco.mjtObj.mjOBJ_LIGHT, LIGHT_NAME
         )
         R, G, B = np.clip(a=rgb_values, a_min=0, a_max=1.0)
         self._model.light_diffuse[light_id] = [R, G, B]
 
     def get_light(self) -> list[float]:
         light_id = mujoco.mj_name2id(
-            self._model, mujoco.mjtObj.mjOBJ_LIGHT, "lamp_light"
+            self._model, mujoco.mjtObj.mjOBJ_LIGHT, LIGHT_NAME
         )
         return [float(c) for c in self._model.light_diffuse[light_id]]
