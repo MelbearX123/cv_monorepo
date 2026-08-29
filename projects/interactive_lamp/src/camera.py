@@ -4,8 +4,6 @@ from config import CAMERA_INDEX, CAMERA_WIDTH, CAMERA_HEIGHT
 
 
 class Camera:
-    """Owns the webcam. The single source of frames for face detection and the VLM."""
-
     def __init__(
         self,
         device_index: int = CAMERA_INDEX,
@@ -19,7 +17,6 @@ class Camera:
             raise RuntimeError("Camera not available")
 
     def get_frame(self):
-        """Return the most recent frame as an RGB image, or None if the read failed."""
         success, frame = self._capture.read()
         if not success:
             return None
@@ -27,7 +24,6 @@ class Camera:
         return rgb_frame
 
     def release(self) -> None:
-        """Free the camera device. Call once on shutdown, or the camera stays locked."""
         self._capture.release()
 
     def __enter__(self) -> "Camera":
