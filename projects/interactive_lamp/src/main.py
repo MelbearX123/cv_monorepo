@@ -1,3 +1,4 @@
+import math
 import time
 
 import cv2
@@ -13,7 +14,13 @@ from lamp_gesture import LampGesture
 from poses import Gesture, poses
 from perception import read_face
 from viewer import make_view, draw
-from config import LAMP_MODEL_PATH, RENDER_WIDTH, RENDER_HEIGHT
+from config import (
+    LAMP_MODEL_PATH,
+    RENDER_WIDTH,
+    RENDER_HEIGHT,
+    THINK_COLOR,
+    THINK_PULSE_HZ,
+)
 
 
 def main() -> None:
@@ -53,18 +60,23 @@ def main() -> None:
                 prev_engaged = state.is_engaged
 
             gesture.step(dt)
+            speech.step()
 
-            speech.step(dt)
-            heard = speech.take_transcript()
-            if heard:
-                # speech.say(heard)  # echo; later: speech.say(reply(heard))
-                pass
-            if (
-                prev_speech_state == SpeechState.SPEAKING
-                and speech.state == SpeechState.IDLE
-            ):
-                speech.listen()
-            prev_speech_state = speech.state
+            if speech.state == SpeechState.TRANSCRIBING:
+                pulse = 0.5 + 0.5 * math.sin(2 * math.pi * THINK_PULSE_HZ * now)
+                lamp.set_light([c * (0.35 + 0.65 * pulse) for c in THINK_COLOR])
+
+            if state.is_engaged:
+                heard = speech.take_transcript()
+                if heard:
+                    speech.say(heard)  # echo to test for now
+                    pass
+                if (
+                    prev_speech_state == SpeechState.SPEAKING
+                    and speech.state == SpeechState.IDLE
+                ):
+                    speech.listen()
+                prev_speech_state = speech.state
 
             draw(renderer, lamp, view)
             if cv2.waitKey(1) & 0xFF == ord("q"):
