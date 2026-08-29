@@ -1,11 +1,3 @@
-"""FaceTracker: wraps MediaPipe FaceLandmarker.
-
-Takes an RGB frame (from Camera, already converted) and returns the detection
-result for the first face -- landmarks (presence), blendshapes (expression), and
-the head-pose matrix -- or None if no face is found. Interpreting those outputs
-into emotion / engagement lives elsewhere; this class only runs the model.
-"""
-
 import time
 
 import mediapipe as mp
@@ -38,7 +30,6 @@ class FaceTracker:
         self._last_timestamp_ms = -1
 
     def process(self, rgb_frame: MatLike) -> FaceLandmarkerResult | None:
-        """Run detection on an RGB frame. Return the result, or None if no face."""
         mp_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
         timestamp_ms = max(
             self._last_timestamp_ms + 1, time.monotonic_ns() // 1_000_000

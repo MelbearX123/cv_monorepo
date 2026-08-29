@@ -30,14 +30,12 @@ class FaceReader:
         self._away_time = 0.0
 
     def read(self, result: FaceLandmarkerResult | None, dt: float) -> tuple[bool, Mood]:
-        """Update engagement + emotion from one frame. Returns (is_engaged, mood)."""
         looking = self._is_looking(result)
         is_engaged = self._update_engagement(looking, dt)
         mood = self._read_emotion(result)
         return is_engaged, mood
 
     def _is_looking(self, result: FaceLandmarkerResult | None) -> bool:
-        """True if a face is present AND oriented toward the lamp."""
         if result is None or not result.facial_transformation_matrixes:
             return False
         matrix = result.facial_transformation_matrixes[0]
@@ -46,7 +44,6 @@ class FaceReader:
         return abs(yaw) < limit
 
     def _update_engagement(self, looking: bool, dt: float) -> bool:
-        """Dwell timing (temporal hysteresis) so engagement can't flicker frame-to-frame."""
         if looking:
             self._looking_time += dt
             self._away_time = 0.0
@@ -60,14 +57,13 @@ class FaceReader:
         return self._is_engaged
 
     def _read_emotion(self, result: FaceLandmarkerResult | None) -> Mood:
-        """Map blendshapes -> Mood (happy / sad / neutral)."""
         if result is None or not result.face_blendshapes:
             return Mood.NEUTRAL
         scores = {c.category_name: c.score for c in result.face_blendshapes[0]}
         smile = max(
             scores.get("mouthSmileLeft", 0.0), scores.get("mouthSmileRight", 0.0)
         )
-        sad = scores.get("browInnerUp", 0.0)  # brow raise is the reliable sad signal
+        sad = scores.get("browInnerUp", 0.0)  # brow raise is sad signal
         if smile > SMILE_THRESHOLD:
             return Mood.HAPPY
         if sad > SAD_THRESHOLD:

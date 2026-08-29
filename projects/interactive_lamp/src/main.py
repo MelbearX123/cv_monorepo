@@ -22,7 +22,6 @@ from config import (
 
 
 def make_view() -> mujoco.MjvCamera:
-    """External orbit camera that frames the lamp for display."""
     view = mujoco.MjvCamera()
     mujoco.mjv_defaultCamera(view)
     view.lookat[:] = VIEW_LOOKAT
