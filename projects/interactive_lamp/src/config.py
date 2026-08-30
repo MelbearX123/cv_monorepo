@@ -74,7 +74,8 @@ MOOD_CHECK_COOLDOWN = 300.0
 
 # --- VLA: point-at-object (radians / normalized frame coords) ---
 POINT_DURATION = 0.8
-POINT_NECK_YAW_LEVEL = 0.0 
+POINT_HOLD = 8.0 
+POINT_NECK_YAW_LEVEL = 0.0
 POINT_NECK_YAW_SPAN = 0.6
 POINT_PITCH_LEVEL = -0.3
 POINT_PITCH_SPAN = 0.3
