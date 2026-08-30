@@ -1,24 +1,31 @@
 import random
 import re
-
+import time
+from datetime import date
 from typing import TYPE_CHECKING
 
 from body.poses import Mood
+from dialogue.phrases import (
+    Category,
+    PointOutcome,
+    KEYWORDS,
+    REPLIES,
+    LOOK_KEYWORDS,
+    LOOK_PHRASES,
+    LOOK_REPLIES,
+    LOOK_EMPTY,
+    RECALL_PHRASES,
+    RECALL_YES,
+    RECALL_NO,
+    POINT_PHRASES,
+    POINT_REPLIES,
+    MOOD_OPENINGS,
+)
+from config import MOOD_CHECK_COOLDOWN
 
 if TYPE_CHECKING:
     from perception.vision_brain import Memory
-from datetime import date
-from enum import StrEnum
-import time
-
-from config import MOOD_CHECK_COOLDOWN
-
-
-class Category(StrEnum):
-    GRATITUDE = "gratitude"
-    AFFIRMATIVE = "affirmative"
-    NEGATIVE = "negative"
-    UNKNOWN = "unknown"
+    from action.vla import PointResult
 
 
 class ResponseManager:
@@ -26,99 +33,6 @@ class ResponseManager:
         self._rng = random.Random()
         self._last_greeting_date = None
         self._last_mood_check = None
-
-        self._keywords: dict[Category, set[str]] = {
-            Category.GRATITUDE: {"thanks", "thank", "appreciate", "grateful"},
-            Category.AFFIRMATIVE: {
-                "yes",
-                "yeah",
-                "yep",
-                "sure",
-                "good",
-                "great",
-                "fine",
-                "okay",
-                "ok",
-                "better",
-                "happy",
-            },
-            Category.NEGATIVE: {
-                "no",
-                "nope",
-                "not",
-                "tired",
-                "stressed",
-                "rough",
-                "bad",
-                "sad",
-                "down",
-                "awful",
-                "terrible",
-                "exhausted",
-            },
-        }
-        self._replies: dict[Category, list[str]] = {
-            Category.GRATITUDE: [
-                "Anytime.",
-                "Happy to help.",
-                "Of course.",
-            ],
-            Category.AFFIRMATIVE: [
-                "Glad to hear it.",
-                "That's good to hear.",
-                "Love that.",
-            ],
-            Category.NEGATIVE: [
-                "I'm sorry to hear that.",
-                "That sounds tough. I'm here.",
-                "Rough one. Take it easy.",
-            ],
-            Category.UNKNOWN: [
-                "I hear you.",
-                "Got it.",
-                "Thanks for telling me.",
-            ],
-        }
-        self._look_keywords: set[str] = {"look"}
-        self._look_phrases: tuple[str, ...] = ("check this out",)
-        self._look_replies: list[str] = [
-            "Oh, {article} {label}! Nice.",
-            "That looks like {article} {label}.",
-            "I see {article} {label}.",
-            "Is that {article} {label}?",
-        ]
-        self._look_empty: list[str] = [
-            "I can't quite make out what you're showing me.",
-            "Hmm, I don't see anything I recognize.",
-            "Show me a little closer?",
-        ]
-        self._recall_phrases: tuple[str, ...] = (
-            "have you seen",
-            "did you see",
-            "seen my",
-            "where is",
-            "where's",
-        )
-        self._recall_yes: list[str] = [
-            "Yes! You showed me {article} {label} at {when}.",
-            "I did. I saw {article} {label}, around {when}.",
-            "Yep, you showed me {article} {label} at {when}.",
-        ]
-        self._recall_no: list[str] = [
-            "I don't think you've shown me that recently.",
-            "Hmm, I haven't seen that lately.",
-            "Not that I recall seeing.",
-        ]
-        self._mood_openings: dict[Mood, list[str]] = {
-            Mood.HAPPY: [
-                "You look cheerful today!",
-                "Someone's in a good mood.",
-            ],
-            Mood.SAD: [
-                "You seem a little down. Everything okay?",
-                "Rough day? I'm here if you want to talk.",
-            ],
-        }
 
     def opening(self, mood: Mood) -> str | None:
         today = date.today()
@@ -131,36 +45,50 @@ class ResponseManager:
             self._last_mood_check is None
             or now - self._last_mood_check > MOOD_CHECK_COOLDOWN
         ):
-            greeting = self._pick(self._mood_openings.get(mood, []))
+            greeting = self._pick(MOOD_OPENINGS.get(mood, []))
             self._last_mood_check = now
         return greeting
 
     def wants_look(self, text: str) -> bool:
         lowered = text.lower()
-        if any(phrase in lowered for phrase in self._look_phrases):
+        if any(phrase in lowered for phrase in LOOK_PHRASES):
             return True
         words = set(re.findall(r"[a-z']+", lowered))
-        return bool(words & self._look_keywords)
+        return bool(words & LOOK_KEYWORDS)
 
     def look(self, label: str | None) -> str:
         if label is None:
-            return self._pick(self._look_empty)
+            return self._pick(LOOK_EMPTY)
         spoken = label.replace("_", " ")
-        article = "an" if spoken[:1] in "aeiou" else "a"
-        return self._pick(self._look_replies).format(article=article, label=spoken)
+        return self._pick(LOOK_REPLIES).format(article=_article(spoken), label=spoken)
 
     def wants_recall(self, text: str) -> bool:
         lowered = text.lower()
-        return any(phrase in lowered for phrase in self._recall_phrases)
+        return any(phrase in lowered for phrase in RECALL_PHRASES)
 
     def recall(self, memory: "Memory | None") -> str:
         if memory is None:
-            return self._pick(self._recall_no)
+            return self._pick(RECALL_NO)
         spoken = memory.label.replace("_", " ")
-        article = "an" if spoken[:1] in "aeiou" else "a"
         when = memory.at.strftime("%I:%M %p").lstrip("0").lower()
-        return self._pick(self._recall_yes).format(
-            article=article, label=spoken, when=when
+        return self._pick(RECALL_YES).format(
+            article=_article(spoken), label=spoken, when=when
+        )
+
+    def wants_point(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(phrase in lowered for phrase in POINT_PHRASES)
+
+    def point_report(self, result: "PointResult") -> str:
+        if not result.found:
+            outcome = PointOutcome.MISSING
+        elif result.centered:
+            outcome = PointOutcome.FOUND
+        else:
+            outcome = PointOutcome.OFF
+        spoken = result.label.replace("_", " ")
+        return self._pick(POINT_REPLIES[outcome]).format(
+            article=_article(spoken), label=spoken
         )
 
     def respond(self, text: str, mood: Mood) -> str:
@@ -173,15 +101,18 @@ class ResponseManager:
         category = self._classify(text)
         if category == Category.UNKNOWN and mood != Mood.NEUTRAL:
             category = Category.NEGATIVE if mood == Mood.SAD else Category.AFFIRMATIVE
-        options = self._replies.get(category) or self._replies[Category.UNKNOWN]
-        return self._pick(options)
+        return self._pick(REPLIES.get(category) or REPLIES[Category.UNKNOWN])
 
     def _classify(self, text: str) -> Category:
         words = set(re.findall(r"[a-z']+", text.lower()))
-        for category, keywords in self._keywords.items():
+        for category, keywords in KEYWORDS.items():
             if words & keywords:
                 return category
         return Category.UNKNOWN
 
     def _pick(self, options: list[str]) -> str:
         return self._rng.choice(options) if options else ""
+
+
+def _article(word: str) -> str:
+    return "an" if word[:1] in "aeiou" else "a"
