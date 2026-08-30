@@ -59,7 +59,7 @@ THINK_COLOR = [0.4, 0.7, 1.0]  # light blue
 THINK_PULSE_HZ = 1.2
 
 # --- Vision: MediaPipe object detector (local, free, real-time) ---
-OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite0.tflite"
+OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite2.tflite"
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
 OBJECT_MEMORY_SIZE = 5
@@ -69,6 +69,7 @@ MOOD_CHECK_COOLDOWN = 300.0
 
 # --- VLA: point-at-object (radians / normalized frame coords) ---
 POINT_DURATION = 0.8
+POINT_NECK_YAW_LEVEL = 0.0 
 POINT_NECK_YAW_SPAN = 0.6
 POINT_PITCH_LEVEL = -0.3
 POINT_PITCH_SPAN = 0.3
