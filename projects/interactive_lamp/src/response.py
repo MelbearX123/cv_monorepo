@@ -24,10 +24,33 @@ class ResponseManager:
 
         self._keywords: dict[Category, set[str]] = {
             Category.GRATITUDE: {"thanks", "thank", "appreciate", "grateful"},
-            Category.AFFIRMATIVE: {"yes", "yeah", "yep", "sure", "good", "great",
-                                   "fine", "okay", "ok", "better", "happy"},
-            Category.NEGATIVE: {"no", "nope", "not", "tired", "stressed", "rough",
-                                "bad", "sad", "down", "awful", "terrible", "exhausted"},
+            Category.AFFIRMATIVE: {
+                "yes",
+                "yeah",
+                "yep",
+                "sure",
+                "good",
+                "great",
+                "fine",
+                "okay",
+                "ok",
+                "better",
+                "happy",
+            },
+            Category.NEGATIVE: {
+                "no",
+                "nope",
+                "not",
+                "tired",
+                "stressed",
+                "rough",
+                "bad",
+                "sad",
+                "down",
+                "awful",
+                "terrible",
+                "exhausted",
+            },
         }
         self._replies: dict[Category, list[str]] = {
             Category.GRATITUDE: [

@@ -85,7 +85,10 @@ class SpeechManager:
         return text
 
     def _speak(self, text: str) -> None:
-        chunks = [chunk for _, _, chunk in self._tts(text, voice=KOKORO_VOICE, speed=KOKORO_SPEED)]
+        chunks = [
+            chunk
+            for _, _, chunk in self._tts(text, voice=KOKORO_VOICE, speed=KOKORO_SPEED)
+        ]
         if not chunks:
             return
         audio = np.concatenate(chunks).astype(np.float32)
