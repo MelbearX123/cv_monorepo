@@ -62,7 +62,7 @@ class ResponseManager:
             ],
         }
 
-    def opening(self, mood: Mood, engaged_seconds: float) -> str | None:
+    def opening(self, mood: Mood) -> str | None:
         today = date.today()
         now = time.monotonic()
         greeting = None

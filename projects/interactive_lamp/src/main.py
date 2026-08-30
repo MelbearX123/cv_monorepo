@@ -54,7 +54,7 @@ def main() -> None:
                 if state.is_engaged and not prev_engaged:
                     gesture = LampGesture(lamp, mood=state.mood)
                     gesture.play(Gesture.ENGAGE)
-                    greeting = response.opening(state.mood, 0.0)
+                    greeting = response.opening(state.mood)
                     if greeting:
                         speech.say(greeting)
                 elif not state.is_engaged and prev_engaged:
