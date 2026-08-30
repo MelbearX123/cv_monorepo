@@ -67,7 +67,9 @@ class VisionBrain:
 
     def seen(self, query: str) -> Memory | None:
         lowered = query.lower()
+        collapsed = lowered.replace(" ", "")
         for item in reversed(self._memory):
-            if item.label.replace("_", " ") in lowered:
+            name = item.label.replace("_", " ")
+            if name in lowered or name.replace(" ", "") in collapsed:
                 return item
         return None
