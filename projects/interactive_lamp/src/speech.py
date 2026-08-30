@@ -21,6 +21,7 @@ from config import (
     WHISPER_DEVICE,
     KOKORO_LANG,
     KOKORO_VOICE,
+    KOKORO_SPEED,
     VAD_THRESHOLD,
     VAD_MIN_SILENCE,
     VAD_SPEECH_PAD,
@@ -84,7 +85,7 @@ class SpeechManager:
         return text
 
     def _speak(self, text: str) -> None:
-        chunks = [chunk for _, _, chunk in self._tts(text, voice=KOKORO_VOICE)]
+        chunks = [chunk for _, _, chunk in self._tts(text, voice=KOKORO_VOICE, speed=KOKORO_SPEED)]
         if not chunks:
             return
         audio = np.concatenate(chunks).astype(np.float32)

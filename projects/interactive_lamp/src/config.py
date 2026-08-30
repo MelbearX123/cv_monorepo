@@ -45,6 +45,7 @@ WHISPER_COMPUTE = "int8"
 WHISPER_DEVICE = "cpu"
 KOKORO_LANG = "a"  # 'a' = American English
 KOKORO_VOICE = "af_heart"
+KOKORO_SPEED = 0.85
 
 # --- Speech: turn-taking / VAD (probability + seconds) ---
 VAD_THRESHOLD = 0.5
