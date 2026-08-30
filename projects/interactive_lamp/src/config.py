@@ -63,6 +63,7 @@ OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite2.tflite"
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
 OBJECT_MEMORY_SIZE = 5
+LOOK_CONFIRM_FRAMES = 10  # frames to sample after "look at this" before naming the object
 
 # --- Debug: live camera + detection overlay window (testing only) ---
 DEBUG_VIEW = True
