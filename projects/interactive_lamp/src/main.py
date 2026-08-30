@@ -16,13 +16,15 @@ from speech.speech import SpeechManager, SpeechState
 from body.lamp_body import LampBody
 from body.lamp_gesture import LampGesture
 from body.poses import Gesture, poses
-from body.viewer import make_view, draw
+from body.viewer import make_view, draw, draw_detections
 from config import (
     LAMP_MODEL_PATH,
     RENDER_WIDTH,
     RENDER_HEIGHT,
     THINK_COLOR,
     THINK_PULSE_HZ,
+    DEBUG_VIEW,
+    DEBUG_DETECT_EVERY,
 )
 
 
@@ -42,6 +44,8 @@ def main() -> None:
     view = make_view()
 
     prev_engaged = False
+    frame_idx = 0
+    debug_dets: list = []
 
     with Camera() as cam, mujoco.Renderer(
         lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
@@ -112,6 +116,11 @@ def main() -> None:
                 print("[listening...]")
 
             draw(renderer, lamp, view)
+            if DEBUG_VIEW and frame is not None:
+                frame_idx += 1
+                if frame_idx % DEBUG_DETECT_EVERY == 0:
+                    debug_dets = vision.detect(frame)
+                draw_detections(frame, debug_dets)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 

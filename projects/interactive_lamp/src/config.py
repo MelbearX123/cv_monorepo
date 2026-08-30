@@ -11,8 +11,8 @@ CAMERA_HEIGHT = 480
 # --- Lamp ---
 LIGHT_NAME = "lamp_light"
 LAMP_MODEL_PATH = ROOT / "assets" / "lamp.xml"
-RENDER_WIDTH = 640
-RENDER_HEIGHT = 480
+RENDER_WIDTH = 960
+RENDER_HEIGHT = 720
 
 # --- Render view (orbit camera framing the lamp) ---
 VIEW_LOOKAT = [0.05, 0.0, 0.35]
@@ -63,6 +63,10 @@ OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite2.tflite"
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
 OBJECT_MEMORY_SIZE = 5
+
+# --- Debug: live camera + detection overlay window (testing only) ---
+DEBUG_VIEW = True
+DEBUG_DETECT_EVERY = 5  # run the overlay detector every N frames to keep the loop responsive
 
 # --- Response: check-in pacing (seconds) ---
 MOOD_CHECK_COOLDOWN = 300.0
