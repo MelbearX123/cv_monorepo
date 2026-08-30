@@ -11,8 +11,8 @@ CAMERA_HEIGHT = 480
 # --- Lamp ---
 LIGHT_NAME = "lamp_light"
 LAMP_MODEL_PATH = ROOT / "assets" / "lamp.xml"
-RENDER_WIDTH = 640
-RENDER_HEIGHT = 480
+RENDER_WIDTH = 960
+RENDER_HEIGHT = 720
 
 # --- Render view (orbit camera framing the lamp) ---
 VIEW_LOOKAT = [0.05, 0.0, 0.35]
@@ -59,10 +59,26 @@ THINK_COLOR = [0.4, 0.7, 1.0]  # light blue
 THINK_PULSE_HZ = 1.2
 
 # --- Vision: MediaPipe object detector (local, free, real-time) ---
-OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite0.tflite"
+OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite2.tflite"
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
 OBJECT_MEMORY_SIZE = 5
+LOOK_CONFIRM_FRAMES = 10  # frames to sample after "look at this" before naming the object
+
+# --- Debug: live camera + detection overlay window (testing only) ---
+DEBUG_VIEW = True
+DEBUG_DETECT_EVERY = 5  # run the overlay detector every N frames to keep the loop responsive
 
 # --- Response: check-in pacing (seconds) ---
 MOOD_CHECK_COOLDOWN = 300.0
+
+# --- VLA: point-at-object (radians / normalized frame coords) ---
+POINT_DURATION = 0.8
+POINT_HOLD = 8.0 
+POINT_NECK_YAW_LEVEL = 0.0
+POINT_NECK_YAW_SPAN = 0.6
+POINT_PITCH_LEVEL = -0.3
+POINT_PITCH_SPAN = 0.3
+POINT_NECK_YAW_SIGN = 1.0
+POINT_CENTER_TOLERANCE = 0.15
+POINT_MAX_CORRECTIONS = 1

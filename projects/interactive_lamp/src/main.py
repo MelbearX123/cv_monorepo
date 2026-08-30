@@ -1,5 +1,6 @@
 import math
 import time
+from collections import Counter
 
 import cv2
 import mujoco
@@ -9,19 +10,23 @@ from perception.face_tracker import FaceTracker
 from perception.face_reader import FaceReader
 from perception.perception import read_face
 from perception.vision_brain import VisionBrain
+from action.vla import VLAManager
 from dialogue.character_state import CharacterState
 from dialogue.response import ResponseManager
 from speech.speech import SpeechManager, SpeechState
 from body.lamp_body import LampBody
 from body.lamp_gesture import LampGesture
 from body.poses import Gesture, poses
-from body.viewer import make_view, draw
+from body.viewer import make_view, draw, draw_detections
 from config import (
     LAMP_MODEL_PATH,
     RENDER_WIDTH,
     RENDER_HEIGHT,
     THINK_COLOR,
     THINK_PULSE_HZ,
+    DEBUG_VIEW,
+    DEBUG_DETECT_EVERY,
+    LOOK_CONFIRM_FRAMES,
 )
 
 
@@ -37,9 +42,14 @@ def main() -> None:
     lamp.set_joints(poses[Gesture.DISENGAGE]["joints"])
     lamp.set_light(poses[Gesture.DISENGAGE]["light"])
     gesture = LampGesture(lamp, mood=state.mood)
+    vla = VLAManager(lamp, vision, state.mood)
     view = make_view()
 
     prev_engaged = False
+    frame_idx = 0
+    debug_dets: list = []
+    look_frames_left = 0
+    look_votes: list = []
 
     with Camera() as cam, mujoco.Renderer(
         lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
@@ -50,7 +60,9 @@ def main() -> None:
             dt = now - prev
             prev = now
 
-            reading = read_face(cam, tracker, reader, dt)
+            # Perception
+            frame = cam.get_frame()
+            reading = read_face(frame, tracker, reader, dt)
             if reading is not None:
                 state.is_engaged, state.mood = reading
                 if state.is_engaged and not prev_engaged:
@@ -64,9 +76,34 @@ def main() -> None:
                     gesture.play(Gesture.DISENGAGE)
                 prev_engaged = state.is_engaged
 
-            gesture.step(dt)
+            # Motion
+            if vla.active:
+                vla.step(dt, frame)
+            else:
+                gesture.step(dt)
             speech.step()
 
+            # Look
+            if look_frames_left > 0:
+                det = vision.main_object(frame) if frame is not None else None
+                if det is not None:
+                    look_votes.append(det)
+                look_frames_left -= 1
+                if look_frames_left == 0:
+                    if look_votes:
+                        most_seen = Counter(d.label for d in look_votes).most_common(1)[0][0]
+                        chosen = next(d for d in reversed(look_votes) if d.label == most_seen)
+                        vision.remember(chosen)
+                        speech.say(response.look(most_seen))
+                    else:
+                        speech.say(response.look(None))
+
+            # Speak
+            result = vla.take_result()
+            if result is not None:
+                speech.say(response.point_report(result))
+
+            # Light
             if speech.state == SpeechState.TRANSCRIBING:
                 pulse = 0.5 + 0.5 * math.sin(2 * math.pi * THINK_PULSE_HZ * now)
                 lamp.set_light([c * (0.35 + 0.65 * pulse) for c in THINK_COLOR])
@@ -76,21 +113,38 @@ def main() -> None:
             heard = speech.take_transcript()
             if heard:
                 print(f"[heard] {heard!r}")
-                if response.wants_recall(heard):
-                    speech.say(response.recall(vision.seen(heard)))
+                if response.wants_point(heard):
+                    if frame is not None and not vla.active:
+                        vla.point_at_label(heard, frame)
+                elif response.wants_recall(heard):
+                    mem = vision.seen(heard)
+                    if mem is not None and not vla.active:
+                        vla.point_at_box(mem.box)
+                    speech.say(response.recall(mem))
                 elif response.wants_look(heard):
-                    frame = cam.get_frame()
-                    det = vision.main_object(frame) if frame is not None else None
-                    if det:
-                        vision.remember(det.label)
-                    speech.say(response.look(det.label if det else None))
+                    look_votes = []
+                    look_frames_left = LOOK_CONFIRM_FRAMES
                 else:
                     speech.say(response.respond(heard, state.mood))
-            elif state.is_engaged and speech.state == SpeechState.IDLE:
-                speech.listen()
-                print("[listening...]")
+            elif (
+                state.is_engaged
+                and speech.state == SpeechState.IDLE
+                and not vla.active
+                and look_frames_left == 0
+            ):
+                checkin = response.mood_checkin(state.mood)
+                if checkin:
+                    speech.say(checkin)
+                else:
+                    speech.listen()
+                    print("[listening...]")
 
             draw(renderer, lamp, view)
+            if DEBUG_VIEW and frame is not None:
+                frame_idx += 1
+                if frame_idx % DEBUG_DETECT_EVERY == 0:
+                    debug_dets = vision.detect(frame)
+                draw_detections(frame, debug_dets)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 

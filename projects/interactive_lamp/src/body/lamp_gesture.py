@@ -32,6 +32,16 @@ class LampGesture:
         self._start = self._capture_bundle(self._sequence[0]["joints"].keys())
         self._active = True
 
+    def play_target(
+        self, joints: dict[str, float], light: list[float], duration: float = 1.0
+    ) -> None:
+        self._sequence = [{"joints": joints, "light": light}]
+        self._seg_index = 0
+        self._elapsed = 0.0
+        self._duration = duration * self._duration_scale
+        self._start = self._capture_bundle(joints.keys())
+        self._active = True
+
     def step(self, dt: float) -> None:
         if not self._active:
             return

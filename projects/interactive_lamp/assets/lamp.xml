@@ -1,6 +1,10 @@
 <mujoco model="dummy_character_lamp_5dof">
   <compiler angle="radian"/>
 
+  <visual>
+    <global offwidth="1280" offheight="960"/>
+  </visual>
+
   <asset>
     <mesh name="lamp_shade_bin" content_type="model/stl" file="lamp_shade_bin.stl"/>
   </asset>
