@@ -53,3 +53,6 @@ VAD_SPEECH_PAD = 0.2
 MAX_RECORD_SECONDS = 10.0
 THINK_COLOR = [0.4, 0.7, 1.0]  # light blue
 THINK_PULSE_HZ = 1.2
+
+# --- Response: check-in pacing (seconds) ---
+MOOD_CHECK_COOLDOWN = 300.0
