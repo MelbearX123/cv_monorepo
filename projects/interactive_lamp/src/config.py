@@ -61,6 +61,7 @@ OBJECT_MODEL_PATH = (
 )
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
+OBJECT_MEMORY_SIZE = 5
 
 # --- Response: check-in pacing (seconds) ---
 MOOD_CHECK_COOLDOWN = 300.0

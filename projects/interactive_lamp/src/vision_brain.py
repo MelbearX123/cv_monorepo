@@ -1,3 +1,5 @@
+from collections import deque
+from datetime import datetime
 from typing import NamedTuple
 
 import numpy as np
@@ -5,13 +7,23 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-from config import OBJECT_MODEL_PATH, OBJECT_MAX_RESULTS, OBJECT_SCORE_THRESHOLD
+from config import (
+    OBJECT_MODEL_PATH,
+    OBJECT_MAX_RESULTS,
+    OBJECT_SCORE_THRESHOLD,
+    OBJECT_MEMORY_SIZE,
+)
 
 
 class Detection(NamedTuple):
     label: str
     score: float
     box: tuple[int, int, int, int]
+
+
+class Memory(NamedTuple):
+    label: str
+    at: datetime
 
 
 class VisionBrain:
@@ -24,6 +36,7 @@ class VisionBrain:
             score_threshold=OBJECT_SCORE_THRESHOLD,
         )
         self._detector = vision.ObjectDetector.create_from_options(options)
+        self._memory: deque[Memory] = deque(maxlen=OBJECT_MEMORY_SIZE)
 
     def detect(self, rgb_frame: np.ndarray) -> list[Detection]:
         mp_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
@@ -47,3 +60,13 @@ class VisionBrain:
         if not objects:
             return None
         return max(objects, key=lambda d: d.score)
+
+    def remember(self, label: str) -> None:
+        self._memory.append(Memory(label=label, at=datetime.now()))
+
+    def seen(self, query: str) -> Memory | None:
+        lowered = query.lower()
+        for item in reversed(self._memory):
+            if item.label.replace("_", " ") in lowered:
+                return item
+        return None
