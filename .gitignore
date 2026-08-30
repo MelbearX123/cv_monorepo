@@ -38,3 +38,4 @@ Thumbs.db
 /projects/interactive_lamp/**/*.log
 /projects/interactive_lamp/**/logs/
 /projects/interactive_lamp/**/.ipynb_checkpoints/
+/projects/interactive_lamp/**/venv/
