@@ -9,6 +9,7 @@ from perception.face_tracker import FaceTracker
 from perception.face_reader import FaceReader
 from perception.perception import read_face
 from perception.vision_brain import VisionBrain
+from action.vla import VLAManager
 from dialogue.character_state import CharacterState
 from dialogue.response import ResponseManager
 from speech.speech import SpeechManager, SpeechState
@@ -37,6 +38,7 @@ def main() -> None:
     lamp.set_joints(poses[Gesture.DISENGAGE]["joints"])
     lamp.set_light(poses[Gesture.DISENGAGE]["light"])
     gesture = LampGesture(lamp, mood=state.mood)
+    vla = VLAManager(lamp, vision, state.mood)
     view = make_view()
 
     prev_engaged = False
@@ -50,7 +52,9 @@ def main() -> None:
             dt = now - prev
             prev = now
 
-            reading = read_face(cam, tracker, reader, dt)
+            # Perception
+            frame = cam.get_frame()
+            reading = read_face(frame, tracker, reader, dt)
             if reading is not None:
                 state.is_engaged, state.mood = reading
                 if state.is_engaged and not prev_engaged:
@@ -64,9 +68,19 @@ def main() -> None:
                     gesture.play(Gesture.DISENGAGE)
                 prev_engaged = state.is_engaged
 
-            gesture.step(dt)
+            # Motion
+            if vla.active:
+                vla.step(dt, frame)
+            else:
+                gesture.step(dt)
             speech.step()
 
+            # Speak
+            result = vla.take_result()
+            if result is not None:
+                speech.say(response.point_report(result))
+
+            # Light
             if speech.state == SpeechState.TRANSCRIBING:
                 pulse = 0.5 + 0.5 * math.sin(2 * math.pi * THINK_PULSE_HZ * now)
                 lamp.set_light([c * (0.35 + 0.65 * pulse) for c in THINK_COLOR])
@@ -76,17 +90,24 @@ def main() -> None:
             heard = speech.take_transcript()
             if heard:
                 print(f"[heard] {heard!r}")
-                if response.wants_recall(heard):
-                    speech.say(response.recall(vision.seen(heard)))
+                if response.wants_point(heard):
+                    if frame is not None and not vla.active:
+                        vla.point_at_label(heard, frame)
+                elif response.wants_recall(heard):
+                    mem = vision.seen(heard)
+                    if mem is not None and not vla.active:
+                        vla.point_at_box(mem.box)
+                    speech.say(response.recall(mem))
                 elif response.wants_look(heard):
-                    frame = cam.get_frame()
                     det = vision.main_object(frame) if frame is not None else None
                     if det:
-                        vision.remember(det.label)
+                        vision.remember(det)
                     speech.say(response.look(det.label if det else None))
                 else:
                     speech.say(response.respond(heard, state.mood))
-            elif state.is_engaged and speech.state == SpeechState.IDLE:
+            elif (
+                state.is_engaged and speech.state == SpeechState.IDLE and not vla.active
+            ):
                 speech.listen()
                 print("[listening...]")
 
