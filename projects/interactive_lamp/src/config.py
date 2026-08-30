@@ -66,3 +66,12 @@ OBJECT_MEMORY_SIZE = 5
 
 # --- Response: check-in pacing (seconds) ---
 MOOD_CHECK_COOLDOWN = 300.0
+
+# --- VLA: point-at-object (radians / normalized frame coords) ---
+POINT_DURATION = 0.8 
+POINT_NECK_YAW_SPAN = 0.6
+POINT_PITCH_LEVEL = -0.3
+POINT_PITCH_SPAN = 0.3
+POINT_NECK_YAW_SIGN = 1.0
+POINT_CENTER_TOLERANCE = 0.15
+POINT_MAX_CORRECTIONS = 1
