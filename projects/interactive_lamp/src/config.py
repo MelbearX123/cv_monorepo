@@ -55,5 +55,13 @@ MAX_RECORD_SECONDS = 10.0
 THINK_COLOR = [0.4, 0.7, 1.0]  # light blue
 THINK_PULSE_HZ = 1.2
 
+# --- Vision: MediaPipe object detector (local, free, real-time) ---
+OBJECT_MODEL_PATH = (
+    Path(__file__).resolve().parent / "models" / "efficientdet_lite0.tflite"
+)
+OBJECT_MAX_RESULTS = 5
+OBJECT_SCORE_THRESHOLD = 0.4
+OBJECT_MEMORY_SIZE = 5
+
 # --- Response: check-in pacing (seconds) ---
 MOOD_CHECK_COOLDOWN = 300.0

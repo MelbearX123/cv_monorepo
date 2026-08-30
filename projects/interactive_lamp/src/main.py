@@ -10,6 +10,7 @@ from face_reader import FaceReader
 from character_state import CharacterState
 from speech import SpeechManager, SpeechState
 from response import ResponseManager
+from vision_brain import VisionBrain
 from lamp_body import LampBody
 from lamp_gesture import LampGesture
 from poses import Gesture, poses
@@ -30,6 +31,7 @@ def main() -> None:
     state = CharacterState()
     speech = SpeechManager()
     response = ResponseManager()
+    vision = VisionBrain()
 
     lamp = LampBody(LAMP_MODEL_PATH)
     lamp.set_joints(poses[Gesture.DISENGAGE]["joints"])
@@ -74,7 +76,16 @@ def main() -> None:
             heard = speech.take_transcript()
             if heard:
                 print(f"[heard] {heard!r}")
-                speech.say(response.respond(heard, state.mood))
+                if response.wants_recall(heard):
+                    speech.say(response.recall(vision.seen(heard)))
+                elif response.wants_look(heard):
+                    frame = cam.get_frame()
+                    det = vision.main_object(frame) if frame is not None else None
+                    if det:
+                        vision.remember(det.label)
+                    speech.say(response.look(det.label if det else None))
+                else:
+                    speech.say(response.respond(heard, state.mood))
             elif state.is_engaged and speech.state == SpeechState.IDLE:
                 speech.listen()
                 print("[listening...]")

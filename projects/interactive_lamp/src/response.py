@@ -1,7 +1,12 @@
 import random
 import re
 
+from typing import TYPE_CHECKING
+
 from poses import Mood
+
+if TYPE_CHECKING:
+    from vision_brain import Memory
 from datetime import date
 from enum import StrEnum
 import time
@@ -74,6 +79,36 @@ class ResponseManager:
                 "Thanks for telling me.",
             ],
         }
+        self._look_keywords: set[str] = {"look"}
+        self._look_phrases: tuple[str, ...] = ("check this out",)
+        self._look_replies: list[str] = [
+            "Oh, {article} {label}! Nice.",
+            "That looks like {article} {label}.",
+            "I see {article} {label}.",
+            "Is that {article} {label}?",
+        ]
+        self._look_empty: list[str] = [
+            "I can't quite make out what you're showing me.",
+            "Hmm, I don't see anything I recognize.",
+            "Show me a little closer?",
+        ]
+        self._recall_phrases: tuple[str, ...] = (
+            "have you seen",
+            "did you see",
+            "seen my",
+            "where is",
+            "where's",
+        )
+        self._recall_yes: list[str] = [
+            "Yes! You showed me {article} {label} at {when}.",
+            "I did. I saw {article} {label}, around {when}.",
+            "Yep, you showed me {article} {label} at {when}.",
+        ]
+        self._recall_no: list[str] = [
+            "I don't think you've shown me that recently.",
+            "Hmm, I haven't seen that lately.",
+            "Not that I recall seeing.",
+        ]
         self._mood_openings: dict[Mood, list[str]] = {
             Mood.HAPPY: [
                 "You look cheerful today!",
@@ -99,6 +134,34 @@ class ResponseManager:
             greeting = self._pick(self._mood_openings.get(mood, []))
             self._last_mood_check = now
         return greeting
+
+    def wants_look(self, text: str) -> bool:
+        lowered = text.lower()
+        if any(phrase in lowered for phrase in self._look_phrases):
+            return True
+        words = set(re.findall(r"[a-z']+", lowered))
+        return bool(words & self._look_keywords)
+
+    def look(self, label: str | None) -> str:
+        if label is None:
+            return self._pick(self._look_empty)
+        spoken = label.replace("_", " ")
+        article = "an" if spoken[:1] in "aeiou" else "a"
+        return self._pick(self._look_replies).format(article=article, label=spoken)
+
+    def wants_recall(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(phrase in lowered for phrase in self._recall_phrases)
+
+    def recall(self, memory: "Memory | None") -> str:
+        if memory is None:
+            return self._pick(self._recall_no)
+        spoken = memory.label.replace("_", " ")
+        article = "an" if spoken[:1] in "aeiou" else "a"
+        when = memory.at.strftime("%I:%M %p").lstrip("0").lower()
+        return self._pick(self._recall_yes).format(
+            article=article, label=spoken, when=when
+        )
 
     def respond(self, text: str, mood: Mood) -> str:
         lowered = text.lower()
