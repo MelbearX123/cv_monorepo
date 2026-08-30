@@ -24,6 +24,7 @@ class Detection(NamedTuple):
 class Memory(NamedTuple):
     label: str
     at: datetime
+    box: tuple[int, int, int, int]
 
 
 class VisionBrain:
@@ -61,8 +62,8 @@ class VisionBrain:
             return None
         return max(objects, key=lambda d: d.score)
 
-    def remember(self, label: str) -> None:
-        self._memory.append(Memory(label=label, at=datetime.now()))
+    def remember(self, det: Detection) -> None:
+        self._memory.append(Memory(label=det.label, at=datetime.now(), box=det.box))
 
     def seen(self, query: str) -> Memory | None:
         lowered = query.lower()
