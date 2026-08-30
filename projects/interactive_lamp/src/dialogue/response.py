@@ -36,18 +36,22 @@ class ResponseManager:
 
     def opening(self, mood: Mood) -> str | None:
         today = date.today()
+        if self._last_greeting_date == today:
+            return None
+        self._last_greeting_date = today
+        return f"Hello! Today is {today:%A, %B} {today.day}."
+
+    def mood_checkin(self, mood: Mood) -> str | None:
+        if mood == Mood.NEUTRAL:
+            return None
         now = time.monotonic()
-        greeting = None
-        if self._last_greeting_date != today:
-            greeting = f"Hello! Today is {today:%A, %B} {today.day}."
-            self._last_greeting_date = today
-        elif mood != Mood.NEUTRAL and (
-            self._last_mood_check is None
-            or now - self._last_mood_check > MOOD_CHECK_COOLDOWN
+        if (
+            self._last_mood_check is not None
+            and now - self._last_mood_check <= MOOD_CHECK_COOLDOWN
         ):
-            greeting = self._pick(MOOD_OPENINGS.get(mood, []))
-            self._last_mood_check = now
-        return greeting
+            return None
+        self._last_mood_check = now
+        return self._pick(MOOD_OPENINGS.get(mood, []))
 
     def wants_look(self, text: str) -> bool:
         lowered = text.lower()
