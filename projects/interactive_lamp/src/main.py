@@ -9,6 +9,7 @@ from face_tracker import FaceTracker
 from face_reader import FaceReader
 from character_state import CharacterState
 from speech import SpeechManager, SpeechState
+from response import ResponseManager
 from lamp_body import LampBody
 from lamp_gesture import LampGesture
 from poses import Gesture, poses
@@ -28,6 +29,7 @@ def main() -> None:
     reader = FaceReader()
     state = CharacterState()
     speech = SpeechManager()
+    response = ResponseManager()
 
     lamp = LampBody(LAMP_MODEL_PATH)
     lamp.set_joints(poses[Gesture.DISENGAGE]["joints"])
@@ -36,7 +38,6 @@ def main() -> None:
     view = make_view()
 
     prev_engaged = False
-    prev_speech_state = SpeechState.IDLE
 
     with Camera() as cam, mujoco.Renderer(
         lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
@@ -53,7 +54,9 @@ def main() -> None:
                 if state.is_engaged and not prev_engaged:
                     gesture = LampGesture(lamp, mood=state.mood)
                     gesture.play(Gesture.ENGAGE)
-                    speech.listen()
+                    greeting = response.opening(state.mood)
+                    if greeting:
+                        speech.say(greeting)
                 elif not state.is_engaged and prev_engaged:
                     gesture = LampGesture(lamp, mood=state.mood)
                     gesture.play(Gesture.DISENGAGE)
@@ -65,18 +68,16 @@ def main() -> None:
             if speech.state == SpeechState.TRANSCRIBING:
                 pulse = 0.5 + 0.5 * math.sin(2 * math.pi * THINK_PULSE_HZ * now)
                 lamp.set_light([c * (0.35 + 0.65 * pulse) for c in THINK_COLOR])
+            elif speech.state == SpeechState.SPEAKING:
+                lamp.set_light(poses[Gesture.ENGAGE]["light"])
 
-            if state.is_engaged:
-                heard = speech.take_transcript()
-                if heard:
-                    speech.say(heard)  # echo to test for now
-                    pass
-                if (
-                    prev_speech_state == SpeechState.SPEAKING
-                    and speech.state == SpeechState.IDLE
-                ):
-                    speech.listen()
-                prev_speech_state = speech.state
+            heard = speech.take_transcript()
+            if heard:
+                print(f"[heard] {heard!r}")
+                speech.say(response.respond(heard, state.mood))
+            elif state.is_engaged and speech.state == SpeechState.IDLE:
+                speech.listen()
+                print("[listening...]")
 
             draw(renderer, lamp, view)
             if cv2.waitKey(1) & 0xFF == ord("q"):

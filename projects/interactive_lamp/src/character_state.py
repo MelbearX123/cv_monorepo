@@ -11,7 +11,6 @@ class Activity(StrEnum):
 
 @dataclass
 class CharacterState:
-    user_emotion: str | None = None
     mood: Mood = Mood.NEUTRAL
     memory: list = field(default_factory=list)
     is_engaged: bool = False
