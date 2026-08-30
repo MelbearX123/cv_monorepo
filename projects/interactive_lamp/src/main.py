@@ -1,5 +1,6 @@
 import math
 import time
+from collections import Counter
 
 import cv2
 import mujoco
@@ -25,6 +26,7 @@ from config import (
     THINK_PULSE_HZ,
     DEBUG_VIEW,
     DEBUG_DETECT_EVERY,
+    LOOK_CONFIRM_FRAMES,
 )
 
 
@@ -46,6 +48,8 @@ def main() -> None:
     prev_engaged = False
     frame_idx = 0
     debug_dets: list = []
+    look_frames_left = 0
+    look_votes: list = []
 
     with Camera() as cam, mujoco.Renderer(
         lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
@@ -79,6 +83,21 @@ def main() -> None:
                 gesture.step(dt)
             speech.step()
 
+            # Look
+            if look_frames_left > 0:
+                det = vision.main_object(frame) if frame is not None else None
+                if det is not None:
+                    look_votes.append(det)
+                look_frames_left -= 1
+                if look_frames_left == 0:
+                    if look_votes:
+                        most_seen = Counter(d.label for d in look_votes).most_common(1)[0][0]
+                        chosen = next(d for d in reversed(look_votes) if d.label == most_seen)
+                        vision.remember(chosen)
+                        speech.say(response.look(most_seen))
+                    else:
+                        speech.say(response.look(None))
+
             # Speak
             result = vla.take_result()
             if result is not None:
@@ -103,17 +122,22 @@ def main() -> None:
                         vla.point_at_box(mem.box)
                     speech.say(response.recall(mem))
                 elif response.wants_look(heard):
-                    det = vision.main_object(frame) if frame is not None else None
-                    if det:
-                        vision.remember(det)
-                    speech.say(response.look(det.label if det else None))
+                    look_votes = []
+                    look_frames_left = LOOK_CONFIRM_FRAMES
                 else:
                     speech.say(response.respond(heard, state.mood))
             elif (
-                state.is_engaged and speech.state == SpeechState.IDLE and not vla.active
+                state.is_engaged
+                and speech.state == SpeechState.IDLE
+                and not vla.active
+                and look_frames_left == 0
             ):
-                speech.listen()
-                print("[listening...]")
+                checkin = response.mood_checkin(state.mood)
+                if checkin:
+                    speech.say(checkin)
+                else:
+                    speech.listen()
+                    print("[listening...]")
 
             draw(renderer, lamp, view)
             if DEBUG_VIEW and frame is not None:

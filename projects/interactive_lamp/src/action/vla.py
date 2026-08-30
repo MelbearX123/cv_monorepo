@@ -12,6 +12,7 @@ from config import (
     CAMERA_WIDTH,
     CAMERA_HEIGHT,
     POINT_DURATION,
+    POINT_HOLD,
     POINT_NECK_YAW_LEVEL,
     POINT_NECK_YAW_SPAN,
     POINT_PITCH_LEVEL,
@@ -25,6 +26,8 @@ from config import (
 class VLAState(StrEnum):
     IDLE = "idle"
     MOVING = "moving"
+    HOLDING = "holding"
+    RETURNING = "returning"
 
 
 class PointResult(NamedTuple):
@@ -45,6 +48,7 @@ class VLAManager:
         self._result: PointResult | None = None
         self._frame_shape: tuple[int, ...] | None = None
         self._aim_center: tuple[float, float] = (0.0, 0.0)
+        self._hold_left = 0.0
 
     @property
     def active(self) -> bool:
@@ -78,19 +82,22 @@ class VLAManager:
         self._start_move(box, self._frame_shape or (CAMERA_HEIGHT, CAMERA_WIDTH))
 
     def step(self, dt: float, frame: np.ndarray) -> None:
-        self._gesture.step(dt)
-        if self._gesture.active:
-            return
-        if not self._live:
-            self._state = VLAState.IDLE
-            return
-        self._resolve(frame)
+        if self._state == VLAState.MOVING:
+            self._gesture.step(dt)
+            if not self._gesture.active:
+                self._resolve(frame) if self._live else self._hold()
+        elif self._state == VLAState.HOLDING:
+            self._hold_left -= dt
+            if self._hold_left <= 0.0:
+                self._start_return()
+        elif self._state == VLAState.RETURNING:
+            self._gesture.step(dt)
+            if not self._gesture.active:
+                self._reset()
 
     def take_result(self) -> PointResult | None:
-        if self._result is None:
-            return None
         result = self._result
-        self._reset()
+        self._result = None  # deliver once; motion keeps running through hold/return
         return result
 
     @staticmethod
@@ -114,7 +121,17 @@ class VLAManager:
 
     def _finish(self, centered: bool) -> None:
         self._result = PointResult(self._goal_label or "", found=True, centered=centered)
-        self._state = VLAState.IDLE
+        self._hold()
+
+    def _hold(self) -> None:
+        self._hold_left = POINT_HOLD
+        self._state = VLAState.HOLDING
+
+    def _start_return(self) -> None:
+        self._state = VLAState.RETURNING
+        self._gesture.play_target(
+            poses["engage"]["joints"], poses["engage"]["light"], POINT_DURATION
+        )
 
     def _reset(self) -> None:
         self._state = VLAState.IDLE
