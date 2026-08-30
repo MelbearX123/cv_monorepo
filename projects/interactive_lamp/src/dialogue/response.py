@@ -3,10 +3,10 @@ import re
 
 from typing import TYPE_CHECKING
 
-from poses import Mood
+from body.poses import Mood
 
 if TYPE_CHECKING:
-    from vision_brain import Memory
+    from perception.vision_brain import Memory
 from datetime import date
 from enum import StrEnum
 import time

@@ -1,7 +1,7 @@
 import math
 from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarkerResult
 
-from poses import Mood
+from body.poses import Mood
 from config import (
     ENGAGE_YAW,
     DISENGAGE_YAW,

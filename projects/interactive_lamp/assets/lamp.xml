@@ -2,7 +2,7 @@
   <compiler angle="radian"/>
 
   <asset>
-    <mesh name="lamp_shade_bin" content_type="model/stl" file="assets/lamp_shade_bin.stl"/>
+    <mesh name="lamp_shade_bin" content_type="model/stl" file="lamp_shade_bin.stl"/>
   </asset>
 
   <worldbody>

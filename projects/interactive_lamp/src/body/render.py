@@ -2,23 +2,21 @@ import mujoco
 import cv2
 import numpy as np
 from PIL import Image
-from pathlib import Path
-from lamp_body import LampBody
-from lamp_gesture import LampGesture
+from body.lamp_body import LampBody
+from body.lamp_gesture import LampGesture
+from config import LAMP_MODEL_PATH, ROOT
 
 WIDTH, HEIGHT = 480, 360
 FPS = 20
-DT = 1.0 / FPS  # fixed timestep -> smooth, deterministic playback
-BASE_DURATION = 0.6  # seconds per segment, before mood scaling
+DT = 1.0 / FPS
+BASE_DURATION = 0.6
 CHAIN = ["disengage", "engage", "shake", "nod", "disengage"]
 MOODS = ["neutral", "happy", "sad"]
 
-model_path = Path(__file__).parent / "lamp.xml"
-out_path = Path(__file__).parent / "lamp_moods.gif"
+out_path = ROOT / "docs" / "lamp_moods.gif"
 
-lamp = LampBody(model_path)
+lamp = LampBody(LAMP_MODEL_PATH)
 
-# External orbit camera framing the whole lamp + floor.
 cam = mujoco.MjvCamera()
 mujoco.mjv_defaultCamera(cam)
 cam.lookat[:] = [0.05, 0.0, 0.35]
@@ -29,13 +27,13 @@ cam.elevation = -20
 frames: list[Image.Image] = []
 with mujoco.Renderer(lamp.model, height=HEIGHT, width=WIDTH) as renderer:
     for mood in MOODS:
-        gesture = LampGesture(lamp, mood=mood)  # mood is fixed per player
+        gesture = LampGesture(lamp, mood=mood)
         for name in CHAIN:
             gesture.play(name, duration=BASE_DURATION)
             while gesture.active:
-                gesture.step(DT)  # advance one fixed tick
+                gesture.step(DT)
                 renderer.update_scene(lamp.data, camera=cam)
-                rgb = renderer.render().copy()  # RGB uint8
+                rgb = renderer.render().copy()
                 cv2.putText(
                     rgb,
                     mood,
@@ -47,12 +45,11 @@ with mujoco.Renderer(lamp.model, height=HEIGHT, width=WIDTH) as renderer:
                 )
                 frames.append(Image.fromarray(rgb))
 
-# Save as an animated GIF (plays inline anywhere; no codec/ffmpeg needed).
 frames[0].save(
     out_path,
     save_all=True,
     append_images=frames[1:],
-    duration=int(1000 / FPS),  # ms per frame
+    duration=int(1000 / FPS),
     loop=0,
     optimize=True,
 )

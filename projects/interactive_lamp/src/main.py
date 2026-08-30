@@ -4,18 +4,18 @@ import time
 import cv2
 import mujoco
 
-from camera import Camera
-from face_tracker import FaceTracker
-from face_reader import FaceReader
-from character_state import CharacterState
-from speech import SpeechManager, SpeechState
-from response import ResponseManager
-from vision_brain import VisionBrain
-from lamp_body import LampBody
-from lamp_gesture import LampGesture
-from poses import Gesture, poses
-from perception import read_face
-from viewer import make_view, draw
+from perception.camera import Camera
+from perception.face_tracker import FaceTracker
+from perception.face_reader import FaceReader
+from perception.perception import read_face
+from perception.vision_brain import VisionBrain
+from dialogue.character_state import CharacterState
+from dialogue.response import ResponseManager
+from speech.speech import SpeechManager, SpeechState
+from body.lamp_body import LampBody
+from body.lamp_gesture import LampGesture
+from body.poses import Gesture, poses
+from body.viewer import make_view, draw
 from config import (
     LAMP_MODEL_PATH,
     RENDER_WIDTH,

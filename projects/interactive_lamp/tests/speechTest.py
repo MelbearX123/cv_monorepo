@@ -5,12 +5,17 @@ Speak after the prompt; it stops on its own when you go quiet.
 Each take is saved to a .wav so you can play it back and confirm the audio is real.
 """
 
+import sys
+from pathlib import Path
+
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
 from config import STT_SAMPLE_RATE
-from speech import SpeechManager
+from speech.speech import SpeechManager
 
 
 def describe(audio: np.ndarray) -> None:

@@ -1,4 +1,4 @@
-from poses import Mood
+from body.poses import Mood
 
 
 def ease_in_out(t: float) -> float:

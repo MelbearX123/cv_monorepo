@@ -1,7 +1,7 @@
-from camera import Camera
-from face_tracker import FaceTracker
-from face_reader import FaceReader
-from poses import Mood
+from perception.camera import Camera
+from perception.face_tracker import FaceTracker
+from perception.face_reader import FaceReader
+from body.poses import Mood
 
 
 def read_face(

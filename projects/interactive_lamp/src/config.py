@@ -1,5 +1,8 @@
 from pathlib import Path
 
+# Project root (one level above src/); data assets live here, not in src/.
+ROOT = Path(__file__).resolve().parent.parent
+
 # --- Camera ---
 CAMERA_INDEX = 0
 CAMERA_WIDTH = 640
@@ -7,7 +10,7 @@ CAMERA_HEIGHT = 480
 
 # --- Lamp ---
 LIGHT_NAME = "lamp_light"
-LAMP_MODEL_PATH = Path(__file__).resolve().parent / "lamp.xml"
+LAMP_MODEL_PATH = ROOT / "assets" / "lamp.xml"
 RENDER_WIDTH = 640
 RENDER_HEIGHT = 480
 
@@ -18,7 +21,7 @@ VIEW_AZIMUTH = 20
 VIEW_ELEVATION = -20
 
 # --- MediaPipe Face Landmarker ---
-MODEL_PATH = Path(__file__).resolve().parent / "models" / "face_landmarker.task"
+MODEL_PATH = ROOT / "models" / "face_landmarker.task"
 MAX_NUM_FACES = 1
 MIN_FACE_DETECTION_CONFIDENCE = 0.5
 MIN_TRACKING_CONFIDENCE = 0.5
@@ -56,9 +59,7 @@ THINK_COLOR = [0.4, 0.7, 1.0]  # light blue
 THINK_PULSE_HZ = 1.2
 
 # --- Vision: MediaPipe object detector (local, free, real-time) ---
-OBJECT_MODEL_PATH = (
-    Path(__file__).resolve().parent / "models" / "efficientdet_lite0.tflite"
-)
+OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite0.tflite"
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
 OBJECT_MEMORY_SIZE = 5

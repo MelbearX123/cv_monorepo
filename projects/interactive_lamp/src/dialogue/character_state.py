@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from poses import Mood
+from body.poses import Mood
 from enum import StrEnum
 
 

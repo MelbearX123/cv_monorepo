@@ -6,11 +6,15 @@ Press 'q' to quit.
 """
 
 import math
+import sys
+from pathlib import Path
 
 import cv2
 
-from camera import Camera
-from face_tracker import FaceTracker
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from perception.camera import Camera
+from perception.face_tracker import FaceTracker
 
 
 def main() -> None:

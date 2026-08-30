@@ -1,7 +1,7 @@
 import cv2
 import mujoco
 
-from lamp_body import LampBody
+from body.lamp_body import LampBody
 from config import (
     VIEW_LOOKAT,
     VIEW_DISTANCE,

@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
-from poses import poses, gestures, Gesture
-from easing import EASING, DURATION_SCALE, ease_in_out
+from body.poses import poses, gestures, Gesture
+from body.easing import EASING, DURATION_SCALE, ease_in_out
 
 
 class LampGesture:
@@ -10,14 +10,14 @@ class LampGesture:
     def __init__(self, lampBody, mood) -> None:
         self._lampBody = lampBody
         self._mood = mood
-        self._ease = EASING.get(mood, ease_in_out)  # mood's timing curve
-        self._duration_scale = DURATION_SCALE.get(mood, 1.0)  # mood's speed multiplier
+        self._ease = EASING.get(mood, ease_in_out)
+        self._duration_scale = DURATION_SCALE.get(mood, 1.0)
 
-        self._sequence: list[dict] = []  # target keyframe bundles, in order
-        self._seg_index = 0  # current segment within the sequence
-        self._start: dict | None = None  # start bundle of the current segment
-        self._elapsed = 0.0  # seconds into the current segment
-        self._duration = 1.0  # seconds per segment (after mood scaling)
+        self._sequence: list[dict] = []
+        self._seg_index = 0
+        self._start: dict | None = None
+        self._elapsed = 0.0
+        self._duration = 1.0
         self._active = False
 
     @property
@@ -71,5 +71,5 @@ class LampGesture:
         if self._seg_index >= len(self._sequence):
             self._active = False
         else:
-            self._start = finished_target  # arrived here; next segment starts from it
+            self._start = finished_target
             self._elapsed = 0.0
