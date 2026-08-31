@@ -13,6 +13,7 @@ from config import (
     AUDIO_MUSIC,
     AUDIO_MUSIC_DUCK,
     AUDIO_DUCK_STEP,
+    AUDIO_POWER_OFF_GAIN,
 )
 
 
@@ -33,7 +34,7 @@ class AudioManager:
     def __init__(self) -> None:
         sr = AUDIO_SAMPLE_RATE
         self._power_on = _load(AUDIO_POWER_ON, sr)
-        self._power_off = _load(AUDIO_POWER_OFF, sr)
+        self._power_off = _load(AUDIO_POWER_OFF, sr) * AUDIO_POWER_OFF_GAIN
         self._music = _load(AUDIO_MUSIC, sr)
 
         self._sfx: np.ndarray | None = None
