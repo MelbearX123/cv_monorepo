@@ -51,7 +51,7 @@ KOKORO_VOICE = "af_heart"
 KOKORO_SPEED = 0.85
 
 # --- Speech: turn-taking / VAD (probability + seconds) ---
-VAD_THRESHOLD = 0.5
+VAD_THRESHOLD = 0.8
 VAD_MIN_SILENCE = 0.7
 VAD_SPEECH_PAD = 0.2
 MAX_RECORD_SECONDS = 10.0

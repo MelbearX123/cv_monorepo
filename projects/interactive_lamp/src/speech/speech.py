@@ -50,6 +50,7 @@ class SpeechManager:
         self._future: Future | None = None
         self._state = SpeechState.IDLE
         self._transcript: str | None = None
+        self._cancel = False
 
     @property
     def state(self) -> SpeechState:
@@ -62,14 +63,20 @@ class SpeechManager:
     def say(self, text: str) -> None:
         if self.active:
             return
+        self._cancel = False
         self._state = SpeechState.SPEAKING
         self._future = self._pool.submit(self._speak, text)
 
     def listen(self) -> None:
         if self.active:
             return
+        self._cancel = False
         self._state = SpeechState.LISTENING
         self._future = self._pool.submit(self._listen)
+
+    def silence(self) -> None:
+        self._cancel = True
+        sd.stop()
 
     def step(self) -> None:
         if self._future is None or not self._future.done():
@@ -119,6 +126,8 @@ class SpeechManager:
             blocksize=VAD_FRAME,
         ) as stream:
             for _ in range(max_frames):
+                if self._cancel:
+                    break
                 block, _ = stream.read(VAD_FRAME)
                 chunk = block[:, 0].copy()
                 frames.append(chunk)
@@ -131,7 +140,7 @@ class SpeechManager:
                     break
 
         vad.reset_states()
-        if not speech_started:
+        if self._cancel or not speech_started:
             return np.zeros(0, dtype=np.float32)
         return np.concatenate(frames).astype(np.float32)
 

@@ -77,6 +77,10 @@ def main() -> None:
                     gesture = LampGesture(lamp, mood=state.mood)
                     gesture.play(Gesture.DISENGAGE)
                     audio.power_off()
+                    speech.silence()
+                    speech.take_transcript()
+                    look_frames_left = 0
+                    look_votes = []
                 prev_engaged = state.is_engaged
 
             # Motion
@@ -90,7 +94,7 @@ def main() -> None:
             )
 
             # Look
-            if look_frames_left > 0:
+            if look_frames_left > 0 and state.is_engaged:
                 det = vision.main_object(frame) if frame is not None else None
                 if det is not None:
                     look_votes.append(det)
@@ -106,7 +110,7 @@ def main() -> None:
 
             # Speak
             result = vla.take_result()
-            if result is not None:
+            if result is not None and state.is_engaged:
                 speech.say(response.point_report(result))
 
             # Light
@@ -117,7 +121,7 @@ def main() -> None:
                 lamp.set_light(poses[Gesture.ENGAGE]["light"])
 
             heard = speech.take_transcript()
-            if heard:
+            if heard and state.is_engaged:
                 print(f"[heard] {heard!r}")
                 if response.wants_stop_music(heard):
                     audio.stop_music()
@@ -141,6 +145,7 @@ def main() -> None:
                 and speech.state == SpeechState.IDLE
                 and not vla.active
                 and look_frames_left == 0
+                and not audio.sfx_playing()
             ):
                 checkin = response.mood_checkin(state.mood)
                 if checkin:

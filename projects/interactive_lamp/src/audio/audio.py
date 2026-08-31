@@ -79,6 +79,9 @@ class AudioManager:
 
         outdata[:, 0] = np.clip(out, -1.0, 1.0)
 
+    def sfx_playing(self) -> bool:
+        return self._sfx is not None
+
     def _play_sfx(self, clip: np.ndarray) -> None:
         if len(clip) == 0:
             return
