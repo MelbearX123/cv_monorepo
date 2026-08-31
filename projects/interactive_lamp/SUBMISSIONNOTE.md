@@ -42,9 +42,9 @@ flowchart LR
     CS -. mood .-> GES & VLA & RESP
 ```
 
-Solid arrows are data (frames, transcript, detections, joint/light targets, audio).
-Dotted `mood` edges are cross-cutting state: mood shapes **delivery** (motion timing,
-phrasing, gesture energy), never spoken content.
+Solid arrows carry data (frames, transcript, detections, joint/light targets, audio).
+Dotted `mood` edges are shared state: mood affects **how** things are delivered
+(motion timing, phrasing, gesture energy), never what the lamp actually says.
 
 ## Data flow
 
@@ -76,26 +76,26 @@ cuts speech, drops any pending transcript, and clears in-progress look/point sta
 
 ## Protocol
 
-The whole system is one process with a single **orchestration loop** in `main.py`
-that owns the clock. Every subsystem exposes a `step(dt)` method, and the loop calls
-each one once per frame. Subsystems only hand results back up to the loop and never call each other.
+The whole system runs in one process with a single **main loop** in `main.py`. Every
+subsystem has a `step(dt)` method, and the loop calls each one once per frame. The
+subsystems hand their results back to the loop and never call each other.
 
-Those results are plain typed values:
+Those results are simple, typed values:
 
 - perception → `(is_engaged, mood)`
 - speech → a transcript `str`
 - action → a `PointResult`
 - vision → a list of `Detection`
 
-Slow work is kept off the loop. Mic capture, Whisper transcription, and the audio
-output stream all run on their own threads and streams; the loop simply **polls**
-them each frame (`take_transcript()`, `take_result()`) and moves on. So a slow
-transcription never stalls rendering or motion. The payoff is that ownership is
-explicit and the loop stays deterministic and easy to reason about.
+Slow work stays off the loop. Mic capture, Whisper transcription, and audio playback
+each run on their own thread. The loop just **checks** them each frame
+(`take_transcript()`, `take_result()`) and moves on. So a slow transcription never
+freezes the rendering or motion. The result is that each part clearly owns its own
+job, and the loop stays simple and easy to follow.
 
 ## Model-to-action
 
-Model outputs are grounded into actuator space, never just printed:
+Each model's output is turned into actual lamp movement, not just printed to screen:
 
 - **Engagement:** MediaPipe face landmarks → head-yaw / gaze thresholds →
   `is_engaged`. A rising edge fires the ENGAGE pose, power-on SFX, and a greeting; a
@@ -113,12 +113,12 @@ Model outputs are grounded into actuator space, never just printed:
 
 ## Simulation
 
-The lamp is a 5-DOF MuJoCo model (`lamp.xml`) with an actuated light element. Motion
-is produced by writing **joint targets** and easing toward them over a duration, not
-by teleporting poses, so movement has believable acceleration and settle. The render
-uses an orbit camera framing the lamp at 960×720. The webcam is treated as a
-world-fixed sensor, not mounted on the lamp head. So "point at X" is a **snapshot**
-aim from a single observation, not closed-loop visual tracking.
+The lamp is a 5-DOF MuJoCo model (`lamp.xml`) with a controllable light. Motion is
+made by setting **joint targets** and easing toward them over time, instead of
+snapping instantly between poses, so the movement speeds up and settles naturally.
+The view uses an orbit camera framing the lamp at 960×720. The webcam sits in the
+world, not on the lamp's head, so "point at X" is a **one-shot** aim from a single
+snapshot, not live tracking.
 
 ## Deployment
 
@@ -144,20 +144,19 @@ server or camera the app still starts and degrades gracefully. Launch from `src/
 - **One loop owns time.** A single per-frame loop drives every manager — simpler and
   more debuggable than an event/actor system; heavy work is pushed to threads and
   polled so the loop never blocks.
-- **No LLM.** Templated, intent-driven dialogue keeps latency low, cost zero, and
-  behavior deterministic on an 8 GB CPU box.
-- **Coordinated modalities.** Engage/disengage transitions fire motion + light + SFX
-  together; music ducks automatically while the user is speaking.
+- **No LLM.** Using fixed, intent-based replies keeps it fast, free to run, and
+  predictable on an 8 GB CPU machine.
+- **Everything reacts together.** Engaging and disengaging fire motion, light, and
+  sound effects at the same time, and music quiets down on its own while the user talks.
 
 ## Measurements
 
-Engagement reliability and memory were measured directly; the latency, frame-rate,
-and CPU figures are **engineering estimates** derived from the known cost of the
-model stack (silero-VAD, faster-whisper base int8, kokoro, MediaPipe,
-EfficientDet-Lite2) running CPU-only. Each row is marked accordingly. Memory was
-read on the Windows development machine, so the target's RSS may differ; the other
-estimates are intended to bound expected behavior. The methodology for capturing the
-remaining exact figures is noted after the table.
+Engagement reliability and memory were measured directly. The latency, frame-rate,
+and CPU figures are **estimates** based on the known cost of the models used
+(silero-VAD, faster-whisper base int8, kokoro, MediaPipe, EfficientDet-Lite2) on a
+CPU. Each row is labeled. Memory was read on the Windows development machine, so the
+target may differ; the other estimates are meant as a rough range. How to capture the
+exact figures is noted after the table.
 
 | Metric | Value |
 |---|---|
@@ -177,15 +176,22 @@ remaining exact figures is noted after the table.
   re-captured by the mic; mitigated by ducking music while listening.
 - **Pointing is directional, not true 3D aim.** The webcam is world-fixed and not
   co-located with the lamp, so the system only maps the object's 2D image position
-  to a pan/tilt direction. The
-  lamp therefore points in the object's *general* direction rather than precisely at
+  to a pan/tilt direction. The lamp therefore points in the object's *general* direction rather than precisely at
   it, and the aim is a single snapshot (corrected once on arrival) rather than
   continuous tracking. On a real robot with a head-mounted camera, or a known
   camera-to-lamp transform, this becomes a genuine point at where the object was
   last seen.
 - **Fixed detector vocabulary.** Object recall/pointing is limited to the COCO-80
   classes EfficientDet knows; out-of-vocabulary objects can't be named or pointed at.
-- **Templated dialogue.** Responses are pattern-matched, so phrasing is bounded and
-  won't handle open-ended conversation the way an LLM would. This is a deliberate trade for latency, determinism, and on-device cost.
-- **No enforced actuator limits.** The sim eases joint targets but does not model
-  torque/velocity limits a physical lamp would impose.
+- **Fixed dialogue.** Replies are chosen by matching patterns, so the wording is
+  limited and it can't hold an open-ended conversation the way an LLM would. This was
+  a deliberate choice to keep it fast, predictable, and cheap to run on-device.
+- **Mood barely changes how the character feels.** Mood is detected and passed
+  around, but in practice it only nudges small things like phrasing and timing, so a
+  happy lamp and a sad lamp look and sound almost the same. I focused on getting the
+  five moments working (although I didn't end up using nod or shake) 
+  rather than on expressive movement, so the lamp's body language is fairly flat. 
+  A real character pass would give each mood its own distinct poses, motion style, and 
+  light behavior to make the personality obvious.
+- **No enforced actuator limits.** The sim eases joint targets but does not model the
+  torque or speed limits a physical lamp would have.
