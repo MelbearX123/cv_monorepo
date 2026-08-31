@@ -19,6 +19,8 @@ from dialogue.phrases import (
     RECALL_NO,
     POINT_PHRASES,
     POINT_REPLIES,
+    MUSIC_PHRASES,
+    STOP_MUSIC_PHRASES,
     MOOD_OPENINGS,
 )
 from config import MOOD_CHECK_COOLDOWN
@@ -78,6 +80,14 @@ class ResponseManager:
         return self._pick(RECALL_YES).format(
             article=_article(spoken), label=spoken, when=when
         )
+
+    def wants_music(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(phrase in lowered for phrase in MUSIC_PHRASES)
+
+    def wants_stop_music(self, text: str) -> bool:
+        lowered = text.lower()
+        return any(phrase in lowered for phrase in STOP_MUSIC_PHRASES)
 
     def wants_point(self, text: str) -> bool:
         lowered = text.lower()

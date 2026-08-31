@@ -11,6 +11,7 @@ from perception.face_reader import FaceReader
 from perception.perception import read_face
 from perception.vision_brain import VisionBrain
 from action.vla import VLAManager
+from audio.audio import AudioManager
 from dialogue.character_state import CharacterState
 from dialogue.response import ResponseManager
 from speech.speech import SpeechManager, SpeechState
@@ -51,7 +52,7 @@ def main() -> None:
     look_frames_left = 0
     look_votes: list = []
 
-    with Camera() as cam, mujoco.Renderer(
+    with Camera() as cam, AudioManager() as audio, mujoco.Renderer(
         lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
     ) as renderer:
         prev = time.perf_counter()
@@ -68,12 +69,14 @@ def main() -> None:
                 if state.is_engaged and not prev_engaged:
                     gesture = LampGesture(lamp, mood=state.mood)
                     gesture.play(Gesture.ENGAGE)
+                    audio.power_on()
                     greeting = response.opening(state.mood)
                     if greeting:
                         speech.say(greeting)
                 elif not state.is_engaged and prev_engaged:
                     gesture = LampGesture(lamp, mood=state.mood)
                     gesture.play(Gesture.DISENGAGE)
+                    audio.power_off()
                 prev_engaged = state.is_engaged
 
             # Motion
@@ -82,6 +85,9 @@ def main() -> None:
             else:
                 gesture.step(dt)
             speech.step()
+            audio.duck(
+                speech.state in (SpeechState.LISTENING, SpeechState.TRANSCRIBING)
+            )
 
             # Look
             if look_frames_left > 0:
@@ -113,7 +119,11 @@ def main() -> None:
             heard = speech.take_transcript()
             if heard:
                 print(f"[heard] {heard!r}")
-                if response.wants_point(heard):
+                if response.wants_stop_music(heard):
+                    audio.stop_music()
+                elif response.wants_music(heard):
+                    audio.play_music()
+                elif response.wants_point(heard):
                     if frame is not None and not vla.active:
                         vla.point_at_label(heard, frame)
                 elif response.wants_recall(heard):
