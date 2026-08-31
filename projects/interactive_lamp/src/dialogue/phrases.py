@@ -128,6 +128,23 @@ POINT_REPLIES: dict[PointOutcome, list[str]] = {
     ],
 }
 
+STOP_MUSIC_PHRASES: tuple[str, ...] = (
+    "stop",
+    "turn off",
+    "turn it off",
+    "quiet",
+    "enough",
+    "silence",
+)
+MUSIC_PHRASES: tuple[str, ...] = (
+    "play music",
+    "play some music",
+    "want music",
+    "some music",
+    "put on music",
+    "music please",
+)
+
 MOOD_OPENINGS: dict[Mood, list[str]] = {
     Mood.HAPPY: [
         "You look cheerful today!",
