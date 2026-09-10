@@ -25,3 +25,9 @@ Thumbs.db
 # Local measurement artifacts
 lamp_usage.png
 *.log
+
+# To keep local
+SUBMISSIONNOTE.md
+SETUP.md
+starter_pack/
+docs/

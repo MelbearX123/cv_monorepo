@@ -66,7 +66,7 @@ OBJECT_MEMORY_SIZE = 5
 LOOK_CONFIRM_FRAMES = 10 
 
 # --- Debug (testing only) ---
-DEBUG_VIEW = False
+DEBUG_VIEW = True
 DEBUG_DETECT_EVERY = 5 
 
 # --- Response: check-in pacing (seconds) ---
