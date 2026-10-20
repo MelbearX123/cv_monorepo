@@ -1,11 +1,13 @@
+from __future__ import annotations
+
 import logging
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from action.vla import VLAManager
 from arbiter import BodyOwner, Decision, LightCue, Snapshot, arbitrate
-from audio.audio import AudioManager
 from body.lamp_body import LampBody
 from body.lamp_gesture import LampGesture
 from body.poses import Gesture, poses
@@ -14,9 +16,12 @@ from dialogue.character_state import CharacterState
 from dialogue.intent import Intent, classify
 from dialogue.response import ResponseManager
 from perception.look import LookBehavior
-from perception.perception import FacePerception
-from perception.vision_brain import VisionBrain
-from speech.speech import SpeechManager
+
+if TYPE_CHECKING:
+    from audio.audio import AudioManager
+    from perception.perception import FacePerception
+    from perception.vision_brain import VisionBrain
+    from speech.speech import SpeechManager
 
 log = logging.getLogger(__name__)
 

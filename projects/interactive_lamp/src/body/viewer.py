@@ -34,8 +34,14 @@ def draw_detections(frame_rgb, detections) -> None:
         x, y, w, h = d.box
         cv2.rectangle(bgr, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(
-            bgr, f"{d.label} {d.score:.2f}", (x, max(y - 6, 12)),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA,
+            bgr,
+            f"{d.label} {d.score:.2f}",
+            (x, max(y - 6, 12)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            1,
+            cv2.LINE_AA,
         )
     cv2.imshow("camera (debug)", bgr)
 

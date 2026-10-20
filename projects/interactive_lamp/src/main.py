@@ -25,9 +25,13 @@ def main() -> None:
     view = make_view()
     overlay = DetectionOverlay(vision)
 
-    with Camera() as cam, AudioManager() as audio, mujoco.Renderer(
-        lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
-    ) as renderer:
+    with (
+        Camera() as cam,
+        AudioManager() as audio,
+        mujoco.Renderer(
+            lamp.model, height=RENDER_HEIGHT, width=RENDER_WIDTH
+        ) as renderer,
+    ):
         character = Character(lamp, face, vision, speech, audio)
         prev = time.perf_counter()
         while True:

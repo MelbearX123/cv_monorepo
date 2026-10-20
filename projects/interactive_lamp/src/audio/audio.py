@@ -45,8 +45,11 @@ class AudioManager:
         self._target_gain = 1.0
 
         self._stream = sd.OutputStream(
-            samplerate=sr, channels=1, dtype="float32",
-            blocksize=1024, callback=self._callback,
+            samplerate=sr,
+            channels=1,
+            dtype="float32",
+            blocksize=1024,
+            callback=self._callback,
         )
         self._stream.start()
 
@@ -73,7 +76,9 @@ class AudioManager:
             self._music_pos = pos
             start = self._gain
             self._gain += float(
-                np.clip(self._target_gain - self._gain, -AUDIO_DUCK_STEP, AUDIO_DUCK_STEP)
+                np.clip(
+                    self._target_gain - self._gain, -AUDIO_DUCK_STEP, AUDIO_DUCK_STEP
+                )
             )
             out += buf * np.linspace(start, self._gain, frames, dtype=np.float32)
 
