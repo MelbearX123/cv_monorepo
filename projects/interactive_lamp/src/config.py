@@ -63,18 +63,18 @@ OBJECT_MODEL_PATH = ROOT / "models" / "efficientdet_lite2.tflite"
 OBJECT_MAX_RESULTS = 5
 OBJECT_SCORE_THRESHOLD = 0.4
 OBJECT_MEMORY_SIZE = 5
-LOOK_CONFIRM_FRAMES = 10 
+LOOK_CONFIRM_FRAMES = 10
 
 # --- Debug (testing only) ---
 DEBUG_VIEW = True
-DEBUG_DETECT_EVERY = 5 
+DEBUG_DETECT_EVERY = 5
 
 # --- Response: check-in pacing (seconds) ---
 MOOD_CHECK_COOLDOWN = 300.0
 
 # --- VLA: point-at-object (radians / normalized frame coords) ---
 POINT_DURATION = 0.8
-POINT_HOLD = 8.0 
+POINT_HOLD = 8.0
 POINT_NECK_YAW_LEVEL = 0.0
 POINT_NECK_YAW_SPAN = 0.6
 POINT_PITCH_LEVEL = -0.3
@@ -91,4 +91,4 @@ AUDIO_POWER_OFF = AUDIO_DIR / "power_off.mp3"
 AUDIO_MUSIC = AUDIO_DIR / "music.mp3"
 AUDIO_MUSIC_DUCK = 0.25
 AUDIO_DUCK_STEP = 0.05
-AUDIO_POWER_OFF_GAIN = 0.4  #lower volume
+AUDIO_POWER_OFF_GAIN = 0.4  # lower volume
