@@ -10,17 +10,11 @@ from dialogue.phrases import (
     PointOutcome,
     KEYWORDS,
     REPLIES,
-    LOOK_KEYWORDS,
-    LOOK_PHRASES,
     LOOK_REPLIES,
     LOOK_EMPTY,
-    RECALL_PHRASES,
     RECALL_YES,
     RECALL_NO,
-    POINT_PHRASES,
     POINT_REPLIES,
-    MUSIC_PHRASES,
-    STOP_MUSIC_PHRASES,
     MOOD_OPENINGS,
 )
 from config import MOOD_CHECK_COOLDOWN
@@ -55,22 +49,11 @@ class ResponseManager:
         self._last_mood_check = now
         return self._pick(MOOD_OPENINGS.get(mood, []))
 
-    def wants_look(self, text: str) -> bool:
-        lowered = text.lower()
-        if any(phrase in lowered for phrase in LOOK_PHRASES):
-            return True
-        words = set(re.findall(r"[a-z']+", lowered))
-        return bool(words & LOOK_KEYWORDS)
-
     def look(self, label: str | None) -> str:
         if label is None:
             return self._pick(LOOK_EMPTY)
         spoken = label.replace("_", " ")
         return self._pick(LOOK_REPLIES).format(article=_article(spoken), label=spoken)
-
-    def wants_recall(self, text: str) -> bool:
-        lowered = text.lower()
-        return any(phrase in lowered for phrase in RECALL_PHRASES)
 
     def recall(self, memory: "Memory | None") -> str:
         if memory is None:
@@ -80,18 +63,6 @@ class ResponseManager:
         return self._pick(RECALL_YES).format(
             article=_article(spoken), label=spoken, when=when
         )
-
-    def wants_music(self, text: str) -> bool:
-        lowered = text.lower()
-        return any(phrase in lowered for phrase in MUSIC_PHRASES)
-
-    def wants_stop_music(self, text: str) -> bool:
-        lowered = text.lower()
-        return any(phrase in lowered for phrase in STOP_MUSIC_PHRASES)
-
-    def wants_point(self, text: str) -> bool:
-        lowered = text.lower()
-        return any(phrase in lowered for phrase in POINT_PHRASES)
 
     def point_report(self, result: "PointResult") -> str:
         if not result.found:

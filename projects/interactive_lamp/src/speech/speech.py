@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from concurrent.futures import Future, ThreadPoolExecutor
-from enum import StrEnum
 
 import numpy as np
 import sounddevice as sd
@@ -27,13 +26,7 @@ from config import (
     VAD_SPEECH_PAD,
     MAX_RECORD_SECONDS,
 )
-
-
-class SpeechState(StrEnum):
-    IDLE = "idle"
-    SPEAKING = "speaking"
-    LISTENING = "listening"
-    TRANSCRIBING = "transcribing"
+from speech.state import SpeechState
 
 
 class SpeechManager:

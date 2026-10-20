@@ -55,6 +55,8 @@ class VLAManager:
         return self._state != VLAState.IDLE
 
     def point_at_label(self, text: str, frame: np.ndarray) -> None:
+        if self.active:
+            return
         self._frame_shape = frame.shape
         self._live = True
         self._corrections = 0
@@ -75,6 +77,8 @@ class VLAManager:
         self._start_move(target.box, frame.shape)
 
     def point_at_box(self, box: tuple[int, int, int, int]) -> None:
+        if self.active:
+            return
         self._live = False
         self._goal_label = None
         self._corrections = 0
@@ -94,6 +98,9 @@ class VLAManager:
             self._gesture.step(dt)
             if not self._gesture.active:
                 self._reset()
+
+    def cancel(self) -> None:
+        self._reset()
 
     def take_result(self) -> PointResult | None:
         result = self._result

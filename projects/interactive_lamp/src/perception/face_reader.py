@@ -1,4 +1,6 @@
 import math
+from typing import NamedTuple
+
 from mediapipe.tasks.python.vision.face_landmarker import FaceLandmarkerResult
 
 from body.poses import Mood
@@ -10,6 +12,11 @@ from config import (
     SMILE_THRESHOLD,
     SAD_THRESHOLD,
 )
+
+
+class FaceReading(NamedTuple):
+    engaged: bool
+    mood: Mood
 
 
 class FaceReader:
@@ -29,11 +36,12 @@ class FaceReader:
         self._looking_time = 0.0
         self._away_time = 0.0
 
-    def read(self, result: FaceLandmarkerResult | None, dt: float) -> tuple[bool, Mood]:
+    def read(self, result: FaceLandmarkerResult | None, dt: float) -> FaceReading:
         looking = self._is_looking(result)
-        is_engaged = self._update_engagement(looking, dt)
-        mood = self._read_emotion(result)
-        return is_engaged, mood
+        return FaceReading(
+            engaged=self._update_engagement(looking, dt),
+            mood=self._read_emotion(result),
+        )
 
     def _is_looking(self, result: FaceLandmarkerResult | None) -> bool:
         if result is None or not result.facial_transformation_matrixes:
