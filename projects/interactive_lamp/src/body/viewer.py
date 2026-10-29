@@ -2,11 +2,13 @@ import cv2
 import mujoco
 
 from body.lamp_body import LampBody
+from perception.vision_brain import Detection, VisionBrain
 from config import (
     VIEW_LOOKAT,
     VIEW_DISTANCE,
     VIEW_AZIMUTH,
     VIEW_ELEVATION,
+    DEBUG_DETECT_EVERY,
 )
 
 
@@ -32,7 +34,27 @@ def draw_detections(frame_rgb, detections) -> None:
         x, y, w, h = d.box
         cv2.rectangle(bgr, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(
-            bgr, f"{d.label} {d.score:.2f}", (x, max(y - 6, 12)),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv2.LINE_AA,
+            bgr,
+            f"{d.label} {d.score:.2f}",
+            (x, max(y - 6, 12)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            1,
+            cv2.LINE_AA,
         )
     cv2.imshow("camera (debug)", bgr)
+
+
+class DetectionOverlay:
+    def __init__(self, vision: VisionBrain, every: int = DEBUG_DETECT_EVERY) -> None:
+        self._vision = vision
+        self._every = every
+        self._frame_count = 0
+        self._detections: list[Detection] = []
+
+    def show(self, frame_rgb) -> None:
+        self._frame_count += 1
+        if self._frame_count % self._every == 0:
+            self._detections = self._vision.detect(frame_rgb)
+        draw_detections(frame_rgb, self._detections)

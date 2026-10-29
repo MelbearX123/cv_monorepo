@@ -55,6 +55,8 @@ class VLAManager:
         return self._state != VLAState.IDLE
 
     def point_at_label(self, text: str, frame: np.ndarray) -> None:
+        if self.active:
+            return
         self._frame_shape = frame.shape
         self._live = True
         self._corrections = 0
@@ -75,6 +77,8 @@ class VLAManager:
         self._start_move(target.box, frame.shape)
 
     def point_at_box(self, box: tuple[int, int, int, int]) -> None:
+        if self.active:
+            return
         self._live = False
         self._goal_label = None
         self._corrections = 0
@@ -95,6 +99,9 @@ class VLAManager:
             if not self._gesture.active:
                 self._reset()
 
+    def cancel(self) -> None:
+        self._reset()
+
     def take_result(self) -> PointResult | None:
         result = self._result
         self._result = None  # deliver once; motion keeps running through hold/return
@@ -113,14 +120,19 @@ class VLAManager:
         target = max(matches, key=lambda d: d.score)
         cx, cy = self._box_center_norm(target.box, self._frame_shape)
         drift = max(abs(cx - self._aim_center[0]), abs(cy - self._aim_center[1]))
-        if drift <= POINT_CENTER_TOLERANCE or self._corrections >= POINT_MAX_CORRECTIONS:
+        if (
+            drift <= POINT_CENTER_TOLERANCE
+            or self._corrections >= POINT_MAX_CORRECTIONS
+        ):
             self._finish(centered=drift <= POINT_CENTER_TOLERANCE)
             return
         self._corrections += 1
         self._start_move(target.box, self._frame_shape)
 
     def _finish(self, centered: bool) -> None:
-        self._result = PointResult(self._goal_label or "", found=True, centered=centered)
+        self._result = PointResult(
+            self._goal_label or "", found=True, centered=centered
+        )
         self._hold()
 
     def _hold(self) -> None:
@@ -148,11 +160,12 @@ class VLAManager:
     def _target_joints(self, box, frame_shape) -> dict[str, float]:
         nx, ny = self._box_center_norm(box, frame_shape)
         held = poses["engage"]["joints"]
+        mirrored_pan = POINT_NECK_YAW_SIGN * nx * POINT_NECK_YAW_SPAN
         return {
             Joints.BASE_YAW: held[Joints.BASE_YAW],
             Joints.SHOULDER_PITCH: held[Joints.SHOULDER_PITCH],
             Joints.ELBOW_PITCH: held[Joints.ELBOW_PITCH],
-            Joints.NECK_YAW: POINT_NECK_YAW_LEVEL - POINT_NECK_YAW_SIGN * nx * POINT_NECK_YAW_SPAN,  # mirror
+            Joints.NECK_YAW: POINT_NECK_YAW_LEVEL - mirrored_pan,
             Joints.HEAD_PITCH: POINT_PITCH_LEVEL + ny * POINT_PITCH_SPAN,
         }
 
